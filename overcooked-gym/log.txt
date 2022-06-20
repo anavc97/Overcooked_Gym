@@ -1,0 +1,75 @@
+pygame 2.1.2 (SDL 2.0.16, Python 3.9.9)
+Hello from the pygame community. https://www.pygame.org/contribute.html
+150000 training timesteps, evaluating every 25000 (6 total train eval phases)
+Phase 1/6
+Training for 25000 timesteps
+Evaluating for 3 episodes
+Episode 0 ended (1000 steps)
+Accumulated Reward: -1000.0
+Making video
+Episode 1 ended (1000 steps)
+Accumulated Reward: -1000.0
+Making video
+Episode 2 ended (1000 steps)
+Accumulated Reward: -1000.0
+Making video
+Phase 2/6
+Training for 25000 timesteps
+Evaluating for 3 episodes
+Episode 0 ended (1000 steps)
+Accumulated Reward: -1000.0
+Making video
+Episode 1 ended (1000 steps)
+Accumulated Reward: -1000.0
+Making video
+Episode 2 ended (1000 steps)
+Accumulated Reward: -1000.0
+Making video
+Phase 3/6
+Training for 25000 timesteps
+Evaluating for 3 episodes
+Episode 0 ended (1000 steps)
+Accumulated Reward: -1000.0
+Making video
+Episode 1 ended (1000 steps)
+Accumulated Reward: -1000.0
+Making video
+Episode 2 ended (1000 steps)
+Accumulated Reward: -1000.0
+Making video
+Phase 4/6
+Training for 25000 timesteps
+Evaluating for 3 episodes
+Episode 0 ended (1000 steps)
+Accumulated Reward: -1000.0
+Making video
+Episode 1 ended (1000 steps)
+Accumulated Reward: -1000.0
+Making video
+Episode 2 ended (1000 steps)
+Accumulated Reward: -1000.0
+Making video
+Phase 5/6
+Training for 25000 timesteps
+Evaluating for 3 episodes
+Episode 0 ended (1000 steps)
+Accumulated Reward: -1000.0
+Making video
+Episode 1 ended (1000 steps)
+Accumulated Reward: -1000.0
+Making video
+Episode 2 ended (1000 steps)
+Accumulated Reward: -1000.0
+Making video
+Phase 6/6
+Training for 25000 timesteps
+Evaluating for 3 episodes
+Episode 0 ended (1000 steps)
+Accumulated Reward: -1000.0
+Making video
+Episode 1 ended (1000 steps)
+Accumulated Reward: -1000.0
+Making video
+Episode 2 ended (1000 steps)
+Accumulated Reward: -1000.0
+Making video
