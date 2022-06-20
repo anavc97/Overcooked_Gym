@@ -9,7 +9,7 @@ import yaaf
 
 if __name__ == '__main__':
 
-    timesteps = 120
+    timesteps = 150
     save_episodes_as_video = True
 
     layout = "Lab"
@@ -35,6 +35,7 @@ if __name__ == '__main__':
         frames.append(env.render(mode="silent"))
 
         if terminal or T == timesteps-1:
+
             print("EPISODE: ", episodes)    
             # Save video
             episodes += 1
@@ -48,8 +49,6 @@ if __name__ == '__main__':
 
             if save_episodes_as_video:
                 make_video(directory, f"resources_astro/episodes/episode_{episodes}.mp4")
-
-            state = env.reset()
 
             frames = [env.render(mode="silent")]
             

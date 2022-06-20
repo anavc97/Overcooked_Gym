@@ -121,7 +121,7 @@ if __name__ == '__main__':
                 if np.all((transitions[:,x,y] == 0)):
                     print("Transition from node ", x, " to node ", y, " is not possible.")
 
-        with open("/home/anavc/simulator/decision/transitions_human.pickle", "wb") as a:
+        with open("/home/anavc/Simulator/simulator/decision/transitions_human.pickle", "wb") as a:
                     pickle.dump(transitions, a)
 
         f.close()

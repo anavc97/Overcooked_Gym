@@ -324,7 +324,6 @@ class Overcooked(Env):
                 next_hand = hand
             else:
                 # Act
-                print("ACTINGG")
                 next_row, next_column = row, column
                 next_heading = heading
                 object_row, object_column = cell_facing_agent(row, column, heading)
@@ -352,8 +351,8 @@ class Overcooked(Env):
     def _random_initial_state(self):
 
         #a0_cell = random.choice(self.valid_start_cells_a0)
-        a1_cell = (13,3)
-        a0_cell = (13,2)
+        a1_cell = (7,6)
+        a0_cell = (6,6)
         '''
         a1_cell = a0_cell
         while a0_cell == a1_cell:
