@@ -5,14 +5,14 @@ import itertools
 import time, random
 
 
-with open("/home/anavc/overcooked-gym/mmdp.pickle", "rb") as f:
+with open("/home/anavc/Overcooked_Gym/overcooked-gym/mmdp.pickle", "rb") as f:
     mmdp = pickle.load(f)
 
 print("INIT POLICY")
 #with open("/home/anavc/overcooked-gym/policy.pickle", "rb") as f:
 #    policy = pickle.load(f)
 
-f = open("/home/anavc/overcooked-gym/policy.pickle","wb")
+f = open("/home/anavc/Overcooked_Gym/overcooked-gym/policy.pickle","wb")
 pickle.dump(mmdp.policy, f)
 
 ACTION_SPACE = tuple(range(6))

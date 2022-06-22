@@ -518,7 +518,9 @@ class SingleAgentWrapper(Wrapper):
             a1 = 5
         else:
             a1 = self.teammate.action(state)
-        a1 = self.teammate.action(state)
+            
+        #a1 = self.teammate.action(state)
+        print("ACTIONS: ", a0, a1)
         joint_action = self.env.pack_joint_action(a0, a1)
         next_state, reward, terminal, info = super().step(joint_action)
         timestep = yaaf.Timestep(state, a1, reward, next_state, terminal, info)

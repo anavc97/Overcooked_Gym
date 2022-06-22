@@ -10,6 +10,7 @@ import time, random, copy
 
 OFFSETS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 agents = ['Human', 'Astro']
+S_COEF = 0.8 #prob of slipping
 STATE_MAP = np.array([
 ["2", "2", "2", "2", "2", "2", "2", "4", "7", "7", "7", "7", "7", "7", "7"],
 ["2", "2", "2", "2", "2", "2", "2", "4", "7", "7", "7", "7", "7", "7", "7"],
@@ -96,7 +97,7 @@ class AstroHandcoded(HandcodedTeammate):
             print("Moving to target.")
             if (a1_column == 12 and 9<=a1_row<=13) or (a1_row == 13 and 6<=a1_column<=12) or (a1_row == 10 and 9<=a1_column<=13) or (a1_row == 9 and 12<=a1_column<=13) or (a1_column == 9 and a1_row == 9) or (a1_column == 8 and a1_row == 12):
                 print("Slipery Slope")
-                if random.random()>=0.8:
+                if random.random()>=S_COEF:
                     print("Slipped")
                     x,y =  self.cell_facing_agent(a1_row, a1_column, a1_heading)
                     action = self._action_to_move_to(state,(x,y-1))
@@ -168,7 +169,7 @@ class AstroSmart(HandcodedTeammate):
         a0_row, a0_column, a1_row, a1_column, a0_heading, a1_heading, a0_hand, a1_hand, pan = state[:9] #a0 - human 1 - astro
         self.balcony_contents = state[9:]
         state_mdp = self.state_converter(state[:9])
-        print("state: ", state_mdp)
+        #print("state: ", state_mdp)
 
         if self.last_state[0] != state_mdp[0]:#ROBOT
             self.target[1] = False
@@ -185,7 +186,7 @@ class AstroSmart(HandcodedTeammate):
         self.last_state = copy.copy(state_mdp)
         self.last_action = copy.copy(a_joint)
 
-        print("ACTION for ", agents[self.index], ": ", a_joint[1-self.index])
+        #print("ACTION for ", agents[self.index], ": ", a_joint[1-self.index])
 
         if a0_hand == HOLDING_ONION:
 
@@ -351,7 +352,7 @@ class AstroSmart(HandcodedTeammate):
                     
                     if state_mdp[1-self.index] == 5 or state_mdp[1-self.index] == 6:
                         print("Slipery Slope")
-                        if random.random()>=0.8:
+                        if random.random()>=S_COEFF:
                             print("Slipped")
                             x,y =  self.cell_facing_agent(pos[0], pos[1],  state_env[5])
                             return self._action_to_move_to(state_env,(x,y-1))
@@ -362,7 +363,7 @@ class AstroSmart(HandcodedTeammate):
                     
                     if state_mdp[1-self.index] == 5 or state_mdp[1-self.index] == 6:
                         print("Slipery Slope")
-                        if random.random()>=0.8:
+                        if random.random()>=S_COEFF:
                             print("Slipped")
                             x,y =  self.cell_facing_agent(pos[0], pos[1],  state_env[5])
                             return self._action_to_move_to(state_env,(x,y-1))
@@ -370,9 +371,6 @@ class AstroSmart(HandcodedTeammate):
                     print(agents[self.index], " goes to target in node: ", state_mdp[1-self.index], " with prob: ",  self.p_joint[self.mdp.state_index(state_mdp)]) # human goes to target position of node
                     return self.go_to_node(state_mdp[1-self.index], state_env)
 
-
-       
-    
     def state_converter(self,state_env):
 
         p1 = int(self.state_map[state_env[2], state_env[3]]) #Robot pos

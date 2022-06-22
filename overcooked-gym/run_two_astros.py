@@ -9,7 +9,7 @@ import yaaf
 
 if __name__ == '__main__':
 
-    timesteps = 150
+    timesteps = 170
     save_episodes_as_video = True
 
     layout = "Lab"

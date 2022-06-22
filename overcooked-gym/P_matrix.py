@@ -29,7 +29,7 @@ ACTION_MEANINGS = [
     "stay",
     "act"
 ]
-S_COEF = 1
+S_COEF = 0.2
 
 ADJACENCY_MATRIX = np.array(
     [
@@ -104,8 +104,8 @@ if __name__ == '__main__':
                         next_state_mdp = agent.state_converter(next_state[:9])
                         print("------- next state: ", next_state[:6], next_state_mdp[1], file=f)
                         if state_mdp[1] == 5 or state_mdp[1] == 6: #SLIPPERY ZONE
-                            transitions[ac, state_mdp[1], next_state_mdp[1]] += S_COEF
-                            transitions[ac, state_mdp[1], state_mdp[1]] += (1-S_COEF)
+                            transitions[ac, state_mdp[1], next_state_mdp[1]] += (1-S_COEF)
+                            transitions[ac, state_mdp[1], state_mdp[1]] += S_COEF
                         else: 
                             transitions[ac, state_mdp[1], next_state_mdp[1]] += 1                  
         print(transitions)
@@ -121,7 +121,7 @@ if __name__ == '__main__':
                 if np.all((transitions[:,x,y] == 0)):
                     print("Transition from node ", x, " to node ", y, " is not possible.")
 
-        with open("/home/anavc/Simulator/simulator/decision/transitions_human.pickle", "wb") as a:
+        with open("/home/anavc/Simulator/simulator/decision/transitions_robot.pickle", "wb") as a:
                     pickle.dump(transitions, a)
 
         f.close()
