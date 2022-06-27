@@ -56,9 +56,22 @@ text = font.render('Time: ' + str(time.time()), True, (255,255,255))
 text2 = font.render('Time with ball: ' + str(time.time()), True, (255,255,255))
 textRect = text.get_rect()
 textRect2 = text.get_rect()
+textRect3 = text.get_rect()
 textRect.center = (int(X*(0.27)), int(Y*(0.95)))
 textRect2.center = (int(X*(0.57)), int(Y*(0.95)))
 game_time = 0
+orig_surf = font.render("*slip*", True, (255,255,255))
+txt_list = []
+
+slipped = False
+
+def fade_in_text(txt_list):
+    for txt in txt_list:
+        display_surface.blit(txt[0], txt[1])
+        if txt[0].get_alpha() <=0:
+            txt_list.remove(txt)
+        else: txt[0].set_alpha(txt[0].get_alpha()-50)
+        
 
 """while not terminal:
     print("Blue hat goes first")
@@ -86,7 +99,6 @@ while not terminal:
     # iterate over the list of Event objects
     # that was returned by pygame.event.get() method.
     event = pygame.event.get()[-1]
-    print("Action beggining : ", action)
     pygame.draw.rect(display_surface, (64,64,64), left_wall)
     pygame.draw.rect(display_surface, (64,64,64), right_wall)
     pygame.draw.rect(display_surface, (64,64,64), up_wall)
@@ -126,8 +138,10 @@ while not terminal:
         print("Time passed")
         action = 5
         
-    print("Action end: ", action)
     state, _, terminal, _ = env.step(action)
+    textRect3.center = (state[3]*15, state[2]*15)
+    print("State: ", state[:9])
+    
     frame = np.rot90(env.render(render_mode))
     frame = np.array(Image.fromarray(frame).resize(size=(Y_resize, X_resize)))
     image = pygame.surfarray.make_surface(frame)
@@ -139,8 +153,17 @@ while not terminal:
     display_surface.blit(text, textRect)
     display_surface.blit(text2, textRect2)
 
+    if state[8] == 1:
+        print("Slippeeeeeeeeeeeeed")
+        pos = (state[3]*(X/15), (state[2]-1)*(Y/15))
+        txt_surf = orig_surf.copy()
+        txt_surf.set_alpha(255)
+        txt_list.append([txt_surf,pos])
+    print(len(txt_list))
+    fade_in_text(txt_list)
+
     pygame.display.update()
-    
+
 print("Game time: ", game_time)
 print("Time with onion in hand: ", round(teammate.onion_time, 1))
 print("Final Score: ", 100 - game_time - round(teammate.onion_time))
