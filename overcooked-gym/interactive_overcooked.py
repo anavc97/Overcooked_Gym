@@ -12,7 +12,7 @@ from PIL import Image
 # initiate pygame and give permission
 # to use pygame's functionality.
 pygame.init()
-MPF = 100
+MPF = 500
 # define the RGB value
 # for white colour
 white = (255, 255, 255)
@@ -57,10 +57,10 @@ text2 = font.render('Time with ball: ' + str(time.time()), True, (255,255,255))
 textRect = text.get_rect()
 textRect2 = text.get_rect()
 textRect3 = text.get_rect()
-textRect.center = (int(X*(0.27)), int(Y*(0.95)))
-textRect2.center = (int(X*(0.57)), int(Y*(0.95)))
+textRect.center = (int(X*(0.27)), int(Y*(0.97)))
+textRect2.center = (int(X*(0.57)), int(Y*(0.97)))
 game_time = 0
-orig_surf = font.render("*slip*", True, (255,255,255))
+orig_surf = font.render("*slip*", True, (0,0,255))
 txt_list = []
 
 slipped = False
@@ -98,71 +98,70 @@ while not terminal:
 
     # iterate over the list of Event objects
     # that was returned by pygame.event.get() method.
-    event = pygame.event.get()[-1]
-    pygame.draw.rect(display_surface, (64,64,64), left_wall)
-    pygame.draw.rect(display_surface, (64,64,64), right_wall)
-    pygame.draw.rect(display_surface, (64,64,64), up_wall)
-    pygame.draw.rect(display_surface, (64,64,64), down_wall)
+    for event in pygame.event.get():
+        #pygame.draw.rect(display_surface, (64,64,64), left_wall)
+        #pygame.draw.rect(display_surface, (64,64,64), right_wall)
+        #pygame.draw.rect(display_surface, (64,64,64), up_wall)
+        #pygame.draw.rect(display_surface, (64,64,64), down_wall)
 
-    # if event object type is QUIT
-    # then quitting the pygame
-    # and program both.
-    if event.type == pygame.QUIT:
-        # deactivates the pygame library
-        pygame.quit()
+        # if event object type is QUIT
+        # then quitting the pygame
+        # and program both.
+        if event.type == pygame.QUIT:
+            # deactivates the pygame library
+            pygame.quit()
 
-        # quit the program.
-        quit()
+            # quit the program.
+            quit()
 
-    if event.type == pygame.KEYDOWN:
-        #pygame.time.set_timer(new_frame, 0)
-        #pygame.time.set_timer(new_frame, MPF)
-        print("Key Pressed")
-        if event.key == pygame.K_UP:
-            action = 0
+        if event.type == pygame.KEYDOWN:
+            #pygame.time.set_timer(new_frame, 0)
+            #pygame.time.set_timer(new_frame, MPF)
+            print("Key Pressed")
+            if event.key == pygame.K_UP:
+                action = 0
 
-        if event.key == pygame.K_DOWN:
-            action = 1
+            if event.key == pygame.K_DOWN:
+                action = 1
 
-        if event.key == pygame.K_LEFT:
-            action = 2
+            if event.key == pygame.K_LEFT:
+                action = 2
 
-        if event.key == pygame.K_RIGHT:
-            action = 3
+            if event.key == pygame.K_RIGHT:
+                action = 3
 
-        if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
-            action = 4
+            if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
+                action = 4
+                
+        if event.type == new_frame or action == None:
+            #action = agent.action(state)
+            print("Time passed")
+            action = 5
             
-    if event.type == new_frame or action == None:
-        #action = agent.action(state)
-        print("Time passed")
-        action = 5
+        state, _, terminal, _ = env.step(action)
+        textRect3.center = (state[3]*15, state[2]*15)
         
-    state, _, terminal, _ = env.step(action)
-    textRect3.center = (state[3]*15, state[2]*15)
-    print("State: ", state[:9])
-    
-    frame = np.rot90(env.render(render_mode))
-    frame = np.array(Image.fromarray(frame).resize(size=(Y_resize, X_resize)))
-    image = pygame.surfarray.make_surface(frame)
+        frame = np.rot90(env.render(render_mode))
+        frame = np.array(Image.fromarray(frame).resize(size=(Y_resize, X_resize)))
+        image = pygame.surfarray.make_surface(frame)
 
-    # Draws the surface object to the screen.
-    game_time = int(time.time()-start_game)
-    text = font.render('Time: ' + str(round(time.time()-start_game, 1)), True, (255,255,255))
-    text2 = font.render('Time with ball: ' + str(round(teammate.onion_time, 1)), True, (255,255,255))
-    display_surface.blit(text, textRect)
-    display_surface.blit(text2, textRect2)
+        # Draws the surface object to the screen.
+        game_time = int(time.time()-start_game)
+        text = font.render('Time: ' + str(round(time.time()-start_game, 1)), True, (255,255,255))
+        text2 = font.render('Time with ball: ' + str(round(teammate.onion_time, 1)), True, (255,255,255))
+        display_surface.blit(text, textRect)
+        display_surface.blit(text2, textRect2)
 
-    if state[8] == 1:
-        print("Slippeeeeeeeeeeeeed")
-        pos = (state[3]*(X/15), (state[2]-1)*(Y/15))
-        txt_surf = orig_surf.copy()
-        txt_surf.set_alpha(255)
-        txt_list.append([txt_surf,pos])
-    print(len(txt_list))
-    fade_in_text(txt_list)
+        if state[8] == 1:
+            print("Slippeeeeeeeeeeeeed")
+            pos = (state[3]*(X/15), (state[2]-1)*(Y/15))
+            txt_surf = orig_surf.copy()
+            txt_surf.set_alpha(255)
+            txt_list.append([txt_surf,pos])
+        print(len(txt_list))
+        fade_in_text(txt_list)
 
-    pygame.display.update()
+        pygame.display.update()
 
 print("Game time: ", game_time)
 print("Time with onion in hand: ", round(teammate.onion_time, 1))

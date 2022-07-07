@@ -496,7 +496,7 @@ class Overcooked(Env):
         players = (p1, p2)
 
         filename = None
-        rgb_image = vis.render_clean_state(players, objects, grid, filename, show)
+        rgb_image = vis.render_clean_state(players, state, objects, grid, filename, show)
         return rgb_image
 
 

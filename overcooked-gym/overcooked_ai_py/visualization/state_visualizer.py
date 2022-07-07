@@ -16,9 +16,14 @@ class StateVisualizer:
     OBJECTS_IMG = MultiFramePygameImage(os.path.join(GRAPHICS_DIR, 'objects.png'), os.path.join(GRAPHICS_DIR, 'objects.json'))
     SOUPS_IMG = MultiFramePygameImage(os.path.join(GRAPHICS_DIR, 'soups.png'), os.path.join(GRAPHICS_DIR, 'soups.json'))
     CHEFS_IMG = MultiFramePygameImage(os.path.join(GRAPHICS_DIR, 'chefs.png'), os.path.join(GRAPHICS_DIR, 'chefs.json'))
+    ASTROS_IMG = MultiFramePygameImage(os.path.join(GRAPHICS_DIR, 'astros.png'), os.path.join(GRAPHICS_DIR, 'chefs.json'))
+
     ARROW_IMG = pygame.image.load(os.path.join(GRAPHICS_DIR, 'arrow.png'))
     INTERACT_IMG = pygame.image.load(os.path.join(GRAPHICS_DIR, 'interact.png'))
     STAY_IMG = pygame.image.load(os.path.join(GRAPHICS_DIR, 'stay.png'))
+    ICE_IMG = pygame.image.load(os.path.join(GRAPHICS_DIR, 'ice.jpg'))
+    SLIP_IMG = pygame.image.load(os.path.join(GRAPHICS_DIR, 'slip.jpg'))
+
     UNSCALED_TILE_SIZE = 15
     DEFAULT_VALUES = {
         "height": None, # if None use grid_width - NOTE: can chop down hud if hud is wider than grid
@@ -175,7 +180,7 @@ class StateVisualizer:
         grid = grid or self.grid
         assert grid
         grid_surface = pygame.surface.Surface(self._unscaled_grid_pixel_size(grid))
-        self._render_grid(grid_surface, grid)
+        self._render_grid(grid_surface, 1, grid)
         if self.scale_by_factor != 1:
             grid_surface = scale_surface_by_factor(grid_surface, self.scale_by_factor)
         rendered_surface = grid_surface
@@ -186,11 +191,11 @@ class StateVisualizer:
             result_surface = rendered_surface
         return result_surface
 
-    def render_clean_state(self, players, objects, grid, img_path=None, show=True):
+    def render_clean_state(self, players, state, objects, grid, img_path=None, show=True):
         pygame.init()
         grid_surface = pygame.surface.Surface(self._unscaled_grid_pixel_size(grid))
-        self._render_grid(grid_surface, grid)
-        self._render_players(grid_surface, players)
+        self._render_grid(grid_surface, state, grid)
+        self._render_players(grid_surface, state, players)
         self._render_objects(grid_surface, objects, grid)
         if self.scale_by_factor != 1:
             grid_surface = scale_surface_by_factor(grid_surface, self.scale_by_factor)
@@ -224,8 +229,8 @@ class StateVisualizer:
         grid = grid or self.grid
         assert grid
         grid_surface = pygame.surface.Surface(self._unscaled_grid_pixel_size(grid))
-        self._render_grid(grid_surface, grid)
-        self._render_players(grid_surface, state.players)
+        self._render_grid(grid_surface, state, grid)
+        self._render_players(grid_surface, state, state.players)
         self._render_objects(grid_surface, state.objects, grid)       
 
         if self.scale_by_factor != 1:
@@ -285,14 +290,17 @@ class StateVisualizer:
         x_tiles = len(grid[0])
         return (x_tiles * self.UNSCALED_TILE_SIZE, y_tiles * self.UNSCALED_TILE_SIZE)
 
-    def _render_grid(self, surface, grid):
+    def _render_grid(self, surface, state, grid):
         for y_tile, row in enumerate(grid):
             for x_tile, tile in enumerate(row):
                 self.TERRAINS_IMG.blit_on_surface(surface, self._position_in_unscaled_pixels((x_tile, y_tile)), 
-                                             StateVisualizer.TILE_TO_FRAME_NAME[tile])
+                StateVisualizer.TILE_TO_FRAME_NAME[tile])
                 if (x_tile == 5 and 11<=y_tile<=13)or (x_tile == 12 and 9<=y_tile<=13) or (y_tile == 13 and 6<=x_tile<=12) or (y_tile == 10 and 9<=x_tile<=13) or (y_tile == 9 and 12<=x_tile<=13) or (x_tile == 9 and y_tile == 9) or (x_tile == 8 and y_tile == 12):
-                    ICE_IMG = pygame.image.load(os.path.join(GRAPHICS_DIR, 'ice.jpg'))
-                    surface.blit(ICE_IMG,self._position_in_unscaled_pixels((x_tile, y_tile)))
+                    surface.blit(self.ICE_IMG,self._position_in_unscaled_pixels((x_tile, y_tile)))
+                    if x_tile == state[3] and y_tile == state[2] and state[8] == 1:
+                        surface.blit(self.SLIP_IMG,self._position_in_unscaled_pixels((x_tile, y_tile)))
+
+                
 
     def _position_in_unscaled_pixels(self, position):
         """
@@ -308,7 +316,7 @@ class StateVisualizer:
         (x,y) = position
         return (self.tile_size * x, self.tile_size * y)
 
-    def _render_players(self, surface, players):
+    def _render_players(self, surface, state, players):
         def chef_frame_name(direction_name, held_object_name):
             frame_name = direction_name
             if held_object_name:
@@ -333,9 +341,12 @@ class StateVisualizer:
                         held_object_name = "soup-tomato"
                 else:
                     held_object_name = held_obj.name
-
-            self.CHEFS_IMG.blit_on_surface(surface, self._position_in_unscaled_pixels(player.position), chef_frame_name(direction_name, held_object_name))
-            self.CHEFS_IMG.blit_on_surface(surface, self._position_in_unscaled_pixels(player.position), hat_frame_name(direction_name, player_color_name))
+            if player_color_name == "green":
+                self.ASTROS_IMG.blit_on_surface(surface, self._position_in_unscaled_pixels(player.position), chef_frame_name(direction_name, held_object_name))
+                self.ASTROS_IMG.blit_on_surface(surface, self._position_in_unscaled_pixels(player.position), hat_frame_name(direction_name, player_color_name))
+            else:
+                self.CHEFS_IMG.blit_on_surface(surface, self._position_in_unscaled_pixels(player.position), chef_frame_name(direction_name, held_object_name))
+                self.CHEFS_IMG.blit_on_surface(surface, self._position_in_unscaled_pixels(player.position), hat_frame_name(direction_name, player_color_name))
 
     @staticmethod
     def _soup_frame_name(ingredients_names, status):
