@@ -4,6 +4,8 @@ from itertools import product
 import yaaf
 from matplotlib import pyplot as plt
 from PIL import Image
+import glob
+import pickle
 
 import numpy as np
 from gym import Env, Wrapper
@@ -38,6 +40,12 @@ NORTH, SOUTH, WEST, EAST = range(4)                                     # Agent 
 HOLDING_NOTHING, HOLDING_ONION, HOLDING_DISH, HOLDING_SOUP = range(4)   # Agent hand state and balconies
 HIGHEST_VALUE = 0   # EMPTY soup pan and agent HOLDING_NOTHING
 LOWEST_VALUE = 4    # SOUP_READY
+
+fileCounter = len(glob.glob1("/home/anavc/Overcooked_Gym/overcooked-gym/","logfile_AstroHuman_*"))
+
+log_file = f"logfile_AstroHuman_{fileCounter-1}.pickle"
+print("READING FROM: ", log_file)
+
 
 
 """
@@ -78,8 +86,18 @@ LAYOUTS = {
         ["X", " ", " ", " ", " ", " ", " ", "X"],
         ["X", "X", "X", "O", "X", "D", "X", "X"],
     ]),
+    "kitchen2": np.array([
+        ["X", "D", "X", "X", "P", "X", "X", "O", "X"],
+        ["X", " ", " ", " ", "B", " ", " ", " ", "X"],
+        ["X", " ", " ", " ", "B", " ", " ", " ", "X"],
+        ["X", " ", " ", " ", " ", " ", " ", " ", "X"],        
+        ["X", " ", "B", "B", "B", "B", "B", " ", "X"],
+        ["X", " ", " ", "B", " ", "B", " ", " ", "X"],
+        ["X", " ", " ", " ", " ", " ", " ", " ", "X"],
+        ["X", "X", "X", "X", "X", "X", "X", "X", "X"],
+    ]),
     "Lab": np.array([
-        ["D", "X", "X", "X", "X", "X", "X", "P", "X", "X", "X", "X", "O", "X", "S"],
+        ["D", "X", "X", "X", "X", "X", "X", "P", "X", "X", "X", "X", "X", "X", "O"],
         ["X", " ", " ", " ", " ", " ", " ", "B", " ", " ", " ", " ", "B", "B", "X"],
         ["X", "B", "B", " ", " ", "B", "B", "B", "B", "B", " ", "B", "B", "B", "X"],
         ["X", "B", "B", " ", " ", "B", "B", "B", "B", "B", " ", "B", "B", "B", "X"],
@@ -109,6 +127,7 @@ class Overcooked(Env):
 
         # Attributes
         self.layout: np.ndarray = np.copy(LAYOUTS[layout]) if isinstance(layout, str) else np.copy(layout)
+        self.layout_name = layout
         self.num_rows, self.num_columns = self.layout.shape
         self.action_meanings = ACTION_MEANINGS
         self.joint_action_meanings = JOINT_ACTION_MEANINGS
@@ -123,7 +142,11 @@ class Overcooked(Env):
         self.pan = self._pan_location(self.layout)
         self.features_meaning = BASE_FEATURES_MEANING + [f"balcony_{b}" for b in range(self.num_balconies)]
         self.onion_picked = None
-        self.onions = Onion_list([(8,1), (2,2), (12,9), (9,10)], [0,0,0,0])
+        if self.layout_name == "Lab":
+            self.onions = Onion_list([(8,1), (2,2), (12,9), (9,10)], [0,0,0,0])
+        elif self.layout_name == "kitchen2":
+            self.onions = Onion_list([(2,4), (4,4), (4,6)], [0,0,0])
+        self.j_a = None
 
         # OpenAI Gym
         self.spec = EnvSpec(id=id)
@@ -170,6 +193,26 @@ class Overcooked(Env):
             self.frame = self.render_state(self.state)
             return self.frame
 
+    def render_log(self, mode="human", log_step=0):
+        with open(log_file, "rb") as f:
+            log = pickle.load(f)
+        print("log step: ", log_step)
+        if mode == "human" or mode == "pygame" or mode == "window":
+            self.frame = self.render_state(log[log_step].state_env, show=True)
+        elif mode == "matplotlib" or mode == "plt":
+            self.frame = self.render_state(log[log_step].state_env)
+            plt.imshow(self.frame)
+            plt.show()
+        elif mode == "file":
+            self.frame = self.render_state(log[log_step].state_env)
+            image = Image.fromarray(self.frame)
+            directory = "videocapture"
+            yaaf.mkdir(directory)
+            filename = f"{directory}/step_{self._timestep}.png"
+            image.save(filename)
+        elif mode == "silent":
+            self.frame = self.render_state(log[log_step].state_env)
+            return self.frame
     # Auxiliary methods
 
     def transition(self, state, joint_action):
@@ -351,8 +394,12 @@ class Overcooked(Env):
     def _random_initial_state(self):
 
         #a0_cell = random.choice(self.valid_start_cells_a0)
-        a1_cell = (7,6)
-        a0_cell = (6,6)
+        if self.layout_name == "Lab":
+            a1_cell = (7,6)
+            a0_cell = (6,6)
+        elif self.layout_name == "kitchen2":
+            a1_cell = (1,1)
+            a0_cell = (2,1)
         '''
         a1_cell = a0_cell
         while a0_cell == a1_cell:
@@ -364,10 +411,16 @@ class Overcooked(Env):
         a0_hand, a1_hand = HOLDING_NOTHING, HOLDING_NOTHING
         pan = EMPTY
         balconies = [EMPTY for _ in range(self.num_balconies)]
-        balconies[4] = HOLDING_ONION #define onion initial pos
-        balconies[33] = HOLDING_ONION
-        balconies[38] = HOLDING_ONION
-        balconies[49] = HOLDING_ONION
+        if self.layout_name == "Lab":
+            balconies[4] = HOLDING_ONION #define onion initial pos
+            balconies[33] = HOLDING_ONION
+            balconies[38] = HOLDING_ONION
+            balconies[49] = HOLDING_ONION
+        elif self.layout_name == "kitchen2":
+            balconies[1] = HOLDING_ONION #define onion initial pos
+            balconies[4] = HOLDING_ONION
+            balconies[6] = HOLDING_ONION
+  
         state = np.array([a0_row, a0_column, a1_row, a1_column, a0_heading, a1_heading, a0_hand, a1_hand, pan] + balconies)
         return state
 
@@ -522,6 +575,7 @@ class SingleAgentWrapper(Wrapper):
         #a1 = self.teammate.action(state)
         print("ACTIONS: ", a0, a1)
         joint_action = self.env.pack_joint_action(a0, a1)
+        self.j_a = joint_action
         next_state, reward, terminal, info = super().step(joint_action)
         timestep = yaaf.Timestep(state, a1, reward, next_state, terminal, info)
         teammate_info = self.teammate.reinforcement(timestep)

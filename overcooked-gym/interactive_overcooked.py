@@ -7,16 +7,22 @@ from teammates.Astro import AstroHandcoded, AstroSmart, JOINT_ACTION_SPACE
 import numpy as np
 import time
 from PIL import Image
+import glob
+import pickle
 
+fileCounter = len(glob.glob1("/home/anavc/Overcooked_Gym/overcooked-gym/","logfile_AstroHuman_*"))
+
+log = []
+log_file = f"logfile_AstroHuman_{fileCounter}.pickle"
 # activate the pygame library .
 # initiate pygame and give permission
 # to use pygame's functionality.
 pygame.init()
-MPF = 500
+MPF = 100
 # define the RGB value
 # for white colour
 white = (255, 255, 255)
-start_game = time.time()
+GREY = (100,100,100)
 
 # assigning values to X and Y variable
 X = 900
@@ -24,10 +30,11 @@ Y = 700
 X_resize = 900
 Y_resize = 700
 
-left_wall = pygame.Rect(0, 0, 55, Y_resize)
-right_wall = pygame.Rect(X_resize-55, 0, 55, Y_resize)
-down_wall = pygame.Rect(0, Y_resize-55, X_resize, 55)
-up_wall = pygame.Rect(0, 0, X_resize, 47)
+left_wall = pygame.Rect(0, 47, 60, Y_resize)
+right_wall = pygame.Rect(X_resize-60, 47, 60, Y_resize)
+down_wall = pygame.Rect(0, Y_resize-47, X_resize, Y_resize)
+up_wall_1 = pygame.Rect(60, 0, 360, 47)
+up_wall_2 = pygame.Rect(480, 0, 360, 47)
 # create the display surface object
 # of specific dimension..e(X, Y).
 # display_surface = pygame.display.set_mode((X, Y))
@@ -51,46 +58,46 @@ terminal = False
 new_frame = pygame.USEREVENT + 1
 pygame.time.set_timer(new_frame, MPF)
 action = 5
-font = pygame.font.SysFont('didot.ttc', 50)
-text = font.render('Time: ' + str(time.time()), True, (255,255,255))
-text2 = font.render('Time with ball: ' + str(time.time()), True, (255,255,255))
+font = pygame.font.Font('/home/anavc/Overcooked_Gym/overcooked-gym/overcooked_ai_py/data/fonts/PublicPixel-0W5Kv.ttf', 25)
+text = font.render('Time: ' + str(time.time()), True, (255,173,1))
+text2 = font.render('Time with ball: ' + str(time.time()), True, (255,173,1))
 textRect = text.get_rect()
 textRect2 = text.get_rect()
 textRect3 = text.get_rect()
-textRect.center = (int(X*(0.27)), int(Y*(0.97)))
-textRect2.center = (int(X*(0.57)), int(Y*(0.97)))
+textRect.center = (int(X*(0.40)), int(Y*(0.965)))
+textRect2.center = (int(X*(0.75)), int(Y*(0.965)))
 game_time = 0
 orig_surf = font.render("*slip*", True, (0,0,255))
 txt_list = []
-
+t = 0
 slipped = False
+
+class LogFrame:
+  def __init__(self, timestep:int , state_env, state_mdp:list, action_env:tuple, action_mdp:tuple, onion_time:float, game_time:float):
+    self.timestep = timestep
+    self.state_env = state_env
+    self.state_mdp = state_mdp
+    self.action_env = action_env
+    self.action_mdp = action_mdp
+    self.onion_time = onion_time
+    self.game_time = game_time
 
 def fade_in_text(txt_list):
     for txt in txt_list:
         display_surface.blit(txt[0], txt[1])
         if txt[0].get_alpha() <=0:
             txt_list.remove(txt)
-        else: txt[0].set_alpha(txt[0].get_alpha()-50)
+        else: txt[0].set_alpha(txt[0].get_alpha()-50)  
         
-
-"""while not terminal:
-    print("Blue hat goes first")
-    print(f"State: {state}")
-    action = agent.action(state)
-    next_state, reward, terminal, info = env.step(action)
-    env.render(render_mode)
-    print(f"State: {next_state}")
-    print(f"Reward: {reward}")"""
-
-
 # infinite loop
+start_game = time.time()
 while not terminal:
     
     action = None
     # completely fill the surface object
     # with white colour
     display_surface.fill(white)
-
+    
     # copying the image surface object
     # to the display surface object at
     # (0, 0) coordinate.
@@ -98,11 +105,12 @@ while not terminal:
 
     # iterate over the list of Event objects
     # that was returned by pygame.event.get() method.
-    for event in pygame.event.get():
-        #pygame.draw.rect(display_surface, (64,64,64), left_wall)
-        #pygame.draw.rect(display_surface, (64,64,64), right_wall)
-        #pygame.draw.rect(display_surface, (64,64,64), up_wall)
-        #pygame.draw.rect(display_surface, (64,64,64), down_wall)
+    for event in pygame.event.get()[-1:]:
+        pygame.draw.rect(display_surface, GREY, left_wall)
+        pygame.draw.rect(display_surface, GREY, right_wall)
+        pygame.draw.rect(display_surface, GREY, up_wall_1)
+        pygame.draw.rect(display_surface, GREY, up_wall_2)
+        pygame.draw.rect(display_surface, GREY, down_wall)
 
         # if event object type is QUIT
         # then quitting the pygame
@@ -113,6 +121,11 @@ while not terminal:
 
             # quit the program.
             quit()
+
+        if event.type == new_frame or action == None:
+            #action = agent.action(state)
+            print("Time passed")
+            action = 5
 
         if event.type == pygame.KEYDOWN:
             #pygame.time.set_timer(new_frame, 0)
@@ -132,13 +145,15 @@ while not terminal:
 
             if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                 action = 4
-                
-        if event.type == new_frame or action == None:
-            #action = agent.action(state)
-            print("Time passed")
-            action = 5
             
         state, _, terminal, _ = env.step(action)
+        
+        #LOG: timestep, environment state, mdp state, environment action, mdp_action, onion_time, game_time
+        game_time = int(time.time()-start_game)
+        timestep_log = LogFrame(t, state, teammate.last_state, env.unpack_joint_action(env.j_a), teammate.last_action, teammate.onion_time, game_time)
+        log.append(timestep_log)
+        t += 1
+
         textRect3.center = (state[3]*15, state[2]*15)
         
         frame = np.rot90(env.render(render_mode))
@@ -146,23 +161,26 @@ while not terminal:
         image = pygame.surfarray.make_surface(frame)
 
         # Draws the surface object to the screen.
-        game_time = int(time.time()-start_game)
-        text = font.render('Time: ' + str(round(time.time()-start_game, 1)), True, (255,255,255))
-        text2 = font.render('Time with ball: ' + str(round(teammate.onion_time, 1)), True, (255,255,255))
+        text = font.render('Time: ' + str(round(time.time()-start_game, 1)), True,(255,173,1) )
+        text2 = font.render('Time with ball: ' + str(round(teammate.onion_time, 1)), True, (255,173,1))
         display_surface.blit(text, textRect)
         display_surface.blit(text2, textRect2)
 
         if state[8] == 1:
-            print("Slippeeeeeeeeeeeeed")
             pos = (state[3]*(X/15), (state[2]-1)*(Y/15))
             txt_surf = orig_surf.copy()
-            txt_surf.set_alpha(255)
+            txt_surf.set_alpha(200)
             txt_list.append([txt_surf,pos])
-        print(len(txt_list))
         fade_in_text(txt_list)
 
         pygame.display.update()
 
+
+
+with open(log_file, "wb") as a:
+    pickle.dump(log, a)
+
+print("TIMESTEPS: ", t)
 print("Game time: ", game_time)
 print("Time with onion in hand: ", round(teammate.onion_time, 1))
 print("Final Score: ", 100 - game_time - round(teammate.onion_time))

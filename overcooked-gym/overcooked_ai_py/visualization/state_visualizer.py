@@ -21,8 +21,8 @@ class StateVisualizer:
     ARROW_IMG = pygame.image.load(os.path.join(GRAPHICS_DIR, 'arrow.png'))
     INTERACT_IMG = pygame.image.load(os.path.join(GRAPHICS_DIR, 'interact.png'))
     STAY_IMG = pygame.image.load(os.path.join(GRAPHICS_DIR, 'stay.png'))
-    ICE_IMG = pygame.image.load(os.path.join(GRAPHICS_DIR, 'ice.jpg'))
-    SLIP_IMG = pygame.image.load(os.path.join(GRAPHICS_DIR, 'slip.jpg'))
+    ICE_IMG = pygame.image.load(os.path.join(GRAPHICS_DIR, 'ice.png'))
+    SLIP_IMG = pygame.image.load(os.path.join(GRAPHICS_DIR, 'slip.png'))
 
     UNSCALED_TILE_SIZE = 15
     DEFAULT_VALUES = {

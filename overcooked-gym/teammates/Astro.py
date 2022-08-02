@@ -7,6 +7,13 @@ from yaaf.policies import deterministic_policy
 from overcooked2 import Overcooked, HOLDING_ONION, HOLDING_NOTHING, HOLDING_DISH, ACTION_MEANINGS
 from teammates.HandcodedTeammate import HandcodedTeammate
 import time, random, copy
+import glob
+
+
+fileCounter = len(glob.glob1("/home/anavc/Overcooked_Gym/overcooked-gym/","logfile_AstroHuman_*"))
+log_file = f"logfile_AstroHuman_{fileCounter-1}.pickle"
+print("READING FROM: ", log_file)
+
 
 OFFSETS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 agents = ['Human', 'Astro']
@@ -70,6 +77,7 @@ class AstroHandcoded(HandcodedTeammate):
         a0_row, a0_column, a1_row, a1_column, a0_heading, a1_heading, a0_hand, a1_hand, pan = state[:9] #a0 - players a1 - teammate
         hand = a0_hand if self.index == 0 else a1_hand
         onions = self.env.onions
+        dist_onion = np.zeros(len(onions.pos))
 
         if a0_hand == HOLDING_ONION:
 
@@ -87,20 +95,24 @@ class AstroHandcoded(HandcodedTeammate):
             
 
         dist_tm = np.linalg.norm(np.array([a0_row,a0_column])-np.array([a1_row,a1_column]))
-        dist_onion = np.linalg.norm(np.array([onions.pos[0][0], onions.pos[0][1]])-np.array([a1_row,a1_column]))
-
-        if a0_hand == HOLDING_ONION or self._facing_balcony_with_onion(state):
-            action = ACTION_MEANINGS.index("stay")
-            print("Waiting for teammate...", dist_onion)
+        for i in range(0,len(onions.pos)):
+            if onions.status[i] == 0: 
+                dist_onion[i] = np.linalg.norm(np.array([onions.pos[i][0], onions.pos[i][1]])-np.array([a1_row,a1_column]))
+            else:
+                dist_onion[i] = 100
+        print(dist_onion)
+        if self.index == 1 and a0_hand == HOLDING_ONION:
+            pos = (a1_row, a1_column)
+            action = self._action_to_move_to(state, (a0_row, a0_column))
         else:
-            action = self._action_to_move_to(state, onions.pos[0])
-            print("Moving to target.")
-            if (a1_column == 12 and 9<=a1_row<=13) or (a1_row == 13 and 6<=a1_column<=12) or (a1_row == 10 and 9<=a1_column<=13) or (a1_row == 9 and 12<=a1_column<=13) or (a1_column == 9 and a1_row == 9) or (a1_column == 8 and a1_row == 12):
+            action = self._action_to_move_to(state, onions.pos[np.argmin(dist_onion)])
+            print("Moving to target: ", onions.pos[np.argmin(dist_onion)])
+            '''if (a1_column == 12 and 9<=a1_row<=13) or (a1_row == 13 and 6<=a1_column<=12) or (a1_row == 10 and 9<=a1_column<=13) or (a1_row == 9 and 12<=a1_column<=13) or (a1_column == 9 and a1_row == 9) or (a1_column == 8 and a1_row == 12):
                 print("Slipery Slope")
                 if random.random()>=(1-S_COEF):
                     print("Slipped")
                     x,y =  self.cell_facing_agent(a1_row, a1_column, a1_heading)
-                    action = self._action_to_move_to(state,(x,y-1))
+                    action = self._action_to_move_to(state,(x,y-1))'''
         
 
         return deterministic_policy(action, len(ACTION_MEANINGS))
@@ -155,6 +167,8 @@ class AstroSmart(HandcodedTeammate):
         self.last_action = 0
         self.target = [False, False]
         self.index = index
+        self.state_mdp = None
+        self.t = 0
 
         with open("/home/anavc/Overcooked_Gym/overcooked-gym/mmdp.pickle", "rb") as f:
             self.mdp = pickle.load(f)
@@ -169,25 +183,25 @@ class AstroSmart(HandcodedTeammate):
         self.env.state[8] = 4
         a0_row, a0_column, a1_row, a1_column, a0_heading, a1_heading, a0_hand, a1_hand, pan = state[:9] #a0 - human 1 - astro
         self.balcony_contents = state[9:]
-        state_mdp = self.state_converter(state[:9])
-        print("state: ", state_mdp)
+        self.state_mdp = self.state_converter(state[:9])
+        #print("state: ", self.state_mdp)
 
-        if self.last_state[0] != state_mdp[0]:#ROBOT
+        if self.last_state[0] != self.state_mdp[0]:#ROBOT
             self.target[1] = False
         
-        if self.last_state[1] != state_mdp[1]:#HUMAN
+        if self.last_state[1] != self.state_mdp[1]:#HUMAN
             self.target[0] = False
 
-        if self.last_state == state_mdp:
+        if self.last_state == self.state_mdp:
             a_joint = self.last_action
         else:
-            a_joint = JOINT_ACTION_SPACE[np.random.choice(range(len(JOINT_ACTION_SPACE)), p=self.p_joint[self.mdp.state_index(state_mdp)])]
-        #a_joint = JOINT_ACTION_SPACE[np.argmax(self.p_joint[self.mdp.state_index(state_mdp)])]
+            a_joint = JOINT_ACTION_SPACE[np.random.choice(range(len(JOINT_ACTION_SPACE)), p=self.p_joint[self.mdp.state_index(self.state_mdp)])]
+        #a_joint = JOINT_ACTION_SPACE[np.argmax(self.p_joint[self.mdp.state_index(self.state_mdp)])]
 
-        self.last_state = copy.copy(state_mdp)
+        self.last_state = copy.copy(self.state_mdp)
         self.last_action = copy.copy(a_joint)
 
-        print("ACTION for ", agents[self.index], ": ", a_joint[1-self.index])
+        #print("ACTION for ", agents[self.index], ": ", a_joint[1-self.index])
 
         if a0_hand == HOLDING_ONION:
 
@@ -203,8 +217,10 @@ class AstroSmart(HandcodedTeammate):
             self.curr_time = 0
             self.prev_time = 0
 
-        action = self.action_converter(state, state_mdp, a_joint[1-self.index]) # Human = player 0 Astro = player 1  
-        self.last_state = copy.copy(state_mdp)
+        action = self.action_converter(state, self.state_mdp, a_joint[1-self.index]) # Human = player 0 Astro = player 1  
+        self.last_state = copy.copy(self.state_mdp)
+        print("T: ", self.t)
+        self.t += 1
         return deterministic_policy(action, len(ACTION_MEANINGS))
 
     def _reinforce(self, timestep: Timestep):
@@ -255,6 +271,17 @@ class AstroSmart(HandcodedTeammate):
         return action_env
 
     def action_converter(self, state_env, state_mdp, action_mdp):
+        
+        if self.index == 1 and state_env[6] == HOLDING_ONION:
+            pos = (state_env[2], state_env[3])
+            if random.random()<S_COEF and  (state_mdp[1-self.index] == 5 or state_mdp[1-self.index] == 6):
+                self.env.state[8] = 1
+                x,y =  self.cell_facing_agent(pos[0], pos[1],  state_env[5])
+                off = copy.copy(OFFSETS)
+                off.pop(state_env[5])
+                i,j = off[np.random.choice(range(len(off)))]
+                return self._action_to_move_to(state_env,(x+i,y+j))
+            return self._action_to_move_to(state_env, (state_env[0], state_env[1]))
 
         #IF STAY
         if action_mdp == 4:
@@ -265,8 +292,8 @@ class AstroSmart(HandcodedTeammate):
                     #print(agents[self.index], " faces onion: ", state_env[0], state_env[1]) 
                     return ACTION_MEANINGS.index("stay")
                 elif not self.target[self.index]:
-                    #print(agents[self.index], " goes to target in node: ", state_mdp[1], " with prob: ",  self.p_joint[self.mdp.state_index(state_mdp)]) # human goes to target position of node
-                    return self.go_to_node(state_mdp[1-self.index], state_env)
+                    #print(agents[self.index], " goes to target in node: ", self.state_mdp[1], " with prob: ",  self.p_joint[self.mdp.state_index(self.state_mdp)]) # human goes to target position of node
+                    return self.go_to_node(self.state_mdp[1-self.index], state_env)
 
             elif self.index == 1: #if robot
                 pos = (state_env[2], state_env[3])
@@ -275,9 +302,8 @@ class AstroSmart(HandcodedTeammate):
                     self.target[self.index] = True
                     return ACTION_MEANINGS.index("stay")
                 elif not self.target[self.index]: 
-                    #print(agents[self.index], " goes to target in node: ", state_mdp[0], " with prob: ",  self.p_joint[self.mdp.state_index(state_mdp)]) # robot goes to target position of node
-                    if random.random()<S_COEF and  (state_mdp[1-self.index] == 5 or state_mdp[1-self.index] == 6):
-                        print("slipped - 4")
+                    #print(agents[self.index], " goes to target in node: ", self.state_mdp[0], " with prob: ",  self.p_joint[self.mdp.state_index(self.state_mdp)]) # robot goes to target position of node
+                    if random.random()<S_COEF and  (self.state_mdp[1-self.index] == 5 or self.state_mdp[1-self.index] == 6):
                         self.env.state[8] = 1
                         x,y =  self.cell_facing_agent(pos[0], pos[1],  state_env[5])
                         off = copy.copy(OFFSETS)
@@ -285,7 +311,7 @@ class AstroSmart(HandcodedTeammate):
                         i,j = off[np.random.choice(range(len(off)))]
                         return self._action_to_move_to(state_env,(x+i,y+j))
 
-                    return self.go_to_node(state_mdp[1-self.index], state_env)
+                    return self.go_to_node(self.state_mdp[1-self.index], state_env)
 
         #IF ACT
         elif action_mdp == 5:                                                               
@@ -296,9 +322,8 @@ class AstroSmart(HandcodedTeammate):
                     self.target[self.index] = True
                     return ACTION_MEANINGS.index("stay")
                 elif not self.target[self.index]: 
-                    #print(agents[self.index], " goes to target in node: ", state_mdp[0], " with prob: ",  self.p_joint[self.mdp.state_index(state_mdp)]) # robot goes to target position of node
-                    if random.random()<S_COEF and (state_mdp[1-self.index] == 5 or state_mdp[1-self.index] == 6):
-                        print("Slipped - 5")
+                    #print(agents[self.index], " goes to target in node: ", self.state_mdp[0], " with prob: ",  self.p_joint[self.mdp.state_index(self.state_mdp)]) # robot goes to target position of node
+                    if random.random()<S_COEF and (self.state_mdp[1-self.index] == 5 or self.state_mdp[1-self.index] == 6):
                         self.env.state[8] = 1
                         x,y =  self.cell_facing_agent(pos[0], pos[1],  state_env[5])
                         off = copy.copy(OFFSETS)
@@ -306,7 +331,7 @@ class AstroSmart(HandcodedTeammate):
                         i,j = off[np.random.choice(range(len(off)))]
                         return self._action_to_move_to(state_env,(x+i,y+j))
 
-                    return self.go_to_node(state_mdp[1-self.index], state_env)
+                    return self.go_to_node(self.state_mdp[1-self.index], state_env)
 
             elif self.index == 0: # HUMAN
                 x,y = self.cell_facing_agent(state_env[0], state_env[1], state_env[4])
@@ -332,8 +357,8 @@ class AstroSmart(HandcodedTeammate):
                         #print("Human is picking up onion") 
                         return ACTION_MEANINGS.index("act") #IF FACING ONION -> PICK IT UP
                 else:
-                    print(agents[self.index], " goes to target in node: ", state_mdp[1], " with prob: ",  self.p_joint[self.mdp.state_index(state_mdp)]) # human goes to target position of node
-                    return self.go_to_node(state_mdp[1-self.index], state_env)
+                    #print(agents[self.index], " goes to target in node: ", self.state_mdp[1], " with prob: ",  self.p_joint[self.mdp.state_index(self.state_mdp)]) # human goes to target position of node
+                    return self.go_to_node(self.state_mdp[1-self.index], state_env)
 
                 return ACTION_MEANINGS.index("act")
         
@@ -343,15 +368,15 @@ class AstroSmart(HandcodedTeammate):
                 pos = (state_env[0], state_env[1])
                 if pos in self.human_pos or self.target[self.index]:
                     self.target[self.index] = True
-                    adjacencies = np.where(ADJACENCY_MATRIX[state_mdp[1-self.index]] == 1)[0]
+                    adjacencies = np.where(ADJACENCY_MATRIX[self.state_mdp[1-self.index]] == 1)[0]
                     downgrade_to_lower_index = int(action_mdp) >= len(adjacencies)
                     action_mdp = 0 if downgrade_to_lower_index else action_mdp
                     node = adjacencies[action_mdp]
-                    #print(agents[self.index], " goes to node: ", node, " with prob: ",  self.p_joint[self.mdp.state_index(state_mdp)])
+                    #print(agents[self.index], " goes to node: ", node, " with prob: ",  self.p_joint[self.mdp.state_index(self.state_mdp)])
                     return self.go_to_node(node, state_env)
                 elif not self.target[self.index]:
-                    #print(agents[self.index], " goes to target in node: ", state_mdp[1], " with prob: ",  self.p_joint[self.mdp.state_index(state_mdp)]) # human goes to target position of node
-                    return self.go_to_node(state_mdp[1-self.index], state_env)
+                    #print(agents[self.index], " goes to target in node: ", self.state_mdp[1], " with prob: ",  self.p_joint[self.mdp.state_index(self.state_mdp)]) # human goes to target position of node
+                    return self.go_to_node(self.state_mdp[1-self.index], state_env)
 
             elif self.index == 1: #if robot
                 pos = (state_env[2], state_env[3])
@@ -359,7 +384,7 @@ class AstroSmart(HandcodedTeammate):
                 for i in range(0,len(self.onions.pos)):
                     self.dist[i] = np.linalg.norm(np.array([pos[0],pos[1]])-np.array([self.onions.pos[i][0], self.onions.pos[i][1]]))
                 
-                if random.random()<S_COEF and (state_mdp[1-self.index] == 5 or state_mdp[1-self.index] == 6):
+                if random.random()<S_COEF and (self.state_mdp[1-self.index] == 5 or self.state_mdp[1-self.index] == 6):
                     print("Slipped - ", action_mdp)
                     self.env.state[8] = 1
                     x,y =  self.cell_facing_agent(pos[0], pos[1],  state_env[5])
@@ -370,16 +395,16 @@ class AstroSmart(HandcodedTeammate):
                                    
                 if pos in self.agent_pos or self.target[self.index] or min(self.dist) <= 1:
                     self.target[self.index] = True
-                    adjacencies = np.where(ADJACENCY_MATRIX[state_mdp[1-self.index]] == 1)[0]
+                    adjacencies = np.where(ADJACENCY_MATRIX[self.state_mdp[1-self.index]] == 1)[0]
                     downgrade_to_lower_index = int(action_mdp) >= len(adjacencies)
                     action_mdp = 0 if downgrade_to_lower_index else action_mdp
                     node = adjacencies[action_mdp]
-                    #print(agents[self.index], " goes to node: ", node, " with prob: ",  self.p_joint[self.mdp.state_index(state_mdp)
+                    #print(agents[self.index], " goes to node: ", node, " with prob: ",  self.p_joint[self.mdp.state_index(self.state_mdp)
                                         
                     return self.go_to_node(node, state_env)
                 else:
-                    #print(agents[self.index], " goes to target in node: ", state_mdp[1-self.index], " with prob: ",  self.p_joint[self.mdp.state_index(state_mdp)]) # human goes to target position of node
-                    return self.go_to_node(state_mdp[1-self.index], state_env)
+                    #print(agents[self.index], " goes to target in node: ", self.state_mdp[1-self.index], " with prob: ",  self.p_joint[self.mdp.state_index(self.state_mdp)]) # human goes to target position of node
+                    return self.go_to_node(self.state_mdp[1-self.index], state_env)
 
     def state_converter(self,state_env):
 
@@ -419,4 +444,55 @@ class AstroSmart(HandcodedTeammate):
         if object_column > self.num_columns: object_column = self.num_columns - 1
 
         return object_row, object_column
+
+#############################################################################################################################################################
+#############################################################################################################################################################
+#############################################################################################################################################################
+#############################################################################################################################################################
+
+
+class AstroFake(HandcodedTeammate):
+    """Agent that fetches the items needed to make and serve the soup and places them in a balcony, so that a teammate
+    can make the soup and serving without having to fetch anything."""
+
+    def __init__(self, layout, index, env=None):
+        super().__init__(layout, index)
+        self.layout = layout
+        self.num_rows, self.num_columns = self.layout.shape
+        self.env = env
+        self.onion_time = 0
+        self.curr_time = 0
+        self.prev_time = 0
+        self.cur_frame = 0
+        with open(log_file, "rb") as f:
+            self.log = pickle.load(f)
+        
+    def policy(self, state: ndarray):
+
+        self.env.state[8] = 4
+        a0_row, a0_column, a1_row, a1_column, a0_heading, a1_heading, a0_hand, a1_hand, pan = state[:9] #a0 - human 1 - astro
+
+        if a0_hand == HOLDING_ONION:
+
+            if self.prev_time == 0:
+                self.prev_time = time.time()
+
+            self.curr_time = time.time()
+
+            self.onion_time += self.curr_time-self.prev_time
+            self.prev_time = self.curr_time
+        
+        if a0_hand != HOLDING_ONION:
+            self.curr_time = 0
+            self.prev_time = 0
+
+        a_joint = self.log[self.cur_frame].action_env
+        action = a_joint[1]
+        print("ACTIONNNN: ", action)
+
+        self.cur_frame += 1
+
+        return deterministic_policy(action, len(ACTION_MEANINGS))
     
+    def _reinforce(self, timestep: Timestep):
+        pass
