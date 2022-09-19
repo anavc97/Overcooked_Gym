@@ -97,6 +97,8 @@ def fade_in_text(txt_list):
 with open(log_file, "rb") as f:
     log = pickle.load(f)
 
+print(isinstance(log[0], LogFrame))
+
 start_game = time.time()
 for logframe in log:
     

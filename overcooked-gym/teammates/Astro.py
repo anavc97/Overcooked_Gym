@@ -100,7 +100,7 @@ class AstroHandcoded(HandcodedTeammate):
                 dist_onion[i] = np.linalg.norm(np.array([onions.pos[i][0], onions.pos[i][1]])-np.array([a1_row,a1_column]))
             else:
                 dist_onion[i] = 100
-        print(dist_onion)
+        
         if self.index == 1 and a0_hand == HOLDING_ONION:
             pos = (a1_row, a1_column)
             action = self._action_to_move_to(state, (a0_row, a0_column))
@@ -219,7 +219,7 @@ class AstroSmart(HandcodedTeammate):
 
         action = self.action_converter(state, self.state_mdp, a_joint[1-self.index]) # Human = player 0 Astro = player 1  
         self.last_state = copy.copy(self.state_mdp)
-        print("T: ", self.t)
+        #print("T: ", self.t)
         self.t += 1
         return deterministic_policy(action, len(ACTION_MEANINGS))
 

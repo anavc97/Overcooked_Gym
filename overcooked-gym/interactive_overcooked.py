@@ -157,12 +157,13 @@ while not terminal:
         textRect3.center = (state[3]*15, state[2]*15)
         
         frame = np.rot90(env.render(render_mode))
-        frame = np.array(Image.fromarray(frame).resize(size=(Y_resize, X_resize)))
+        #frame = np.array(Image.fromarray(frame).resize(size=(Y_resize, X_resize)))
         image = pygame.surfarray.make_surface(frame)
+        image = pygame.transform.scale(image, (X_resize, Y_resize))
 
         # Draws the surface object to the screen.
         text = font.render('Time: ' + str(round(time.time()-start_game, 1)), True,(255,173,1) )
-        text2 = font.render('Time with ball: ' + str(round(teammate.onion_time, 1)), True, (255,173,1))
+        text2 = font.render('Time with ball: ' + str(round(teammate.onion_time)), True, (255,173,1))
         display_surface.blit(text, textRect)
         display_surface.blit(text2, textRect2)
 

@@ -127,9 +127,9 @@ while not terminal:
             print("Time passed")
             action = 5
 
-        if event.type == pygame.KEYDOWN:
-            #pygame.time.set_timer(new_frame, 0)
-            #pygame.time.set_timer(new_frame, MPF)
+        elif event.type == pygame.KEYDOWN:
+            pygame.time.set_timer(new_frame, 0)
+            pygame.time.set_timer(new_frame, MPF)
             print("Key Pressed")
             if event.key == pygame.K_UP:
                 action = 0
@@ -147,7 +147,7 @@ while not terminal:
                 action = 4
             
         state, _, terminal, _ = env.step(action)
-        
+        print("action sent: ", action)
         #LOG: timestep, environment state, mdp state, environment action, mdp_action, onion_time, game_time
         game_time = int(time.time()-start_game)
         timestep_log = LogFrame(t, state, 0, env.unpack_joint_action(env.j_a), 0, teammate.onion_time, game_time)

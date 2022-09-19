@@ -567,13 +567,11 @@ class SingleAgentWrapper(Wrapper):
         self.i += 1
         state = self.env.state
         
-        if self.i % 2 == 0:
-            a1 = 5
-        else:
+        if self.i % 5 == 0:
             a1 = self.teammate.action(state)
+        else:
+            a1 = 5
             
-        #a1 = self.teammate.action(state)
-        print("ACTIONS: ", a0, a1)
         joint_action = self.env.pack_joint_action(a0, a1)
         self.j_a = joint_action
         next_state, reward, terminal, info = super().step(joint_action)
