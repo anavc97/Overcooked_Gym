@@ -170,14 +170,19 @@ class AstroSmart(HandcodedTeammate):
         self.state_mdp = None
         self.t = 0
 
-        with open("/home/anavc/Overcooked_Gym/overcooked-gym/mmdp.pickle", "rb") as f:
-            self.mdp = pickle.load(f)
+        with open("/home/anavc/Overcooked_Gym/overcooked-gym/mdp_ind.pickle", "rb") as f:
+            self.mdp_ind = pickle.load(f)
+
         print("Initializing MDP")
         with open("/home/anavc/Overcooked_Gym/overcooked-gym/policy.pickle", "rb") as f:
             self.p_joint =  pickle.load(f)
         print("Done MDP")
 
-    
+    def check_index(self, state):
+        for ind, val in enumerate(self.mdp_ind):
+            if np.array_equal(np.array(val),np.array(state)):
+                print(ind,val)
+                return ind
 
     def policy(self, state: ndarray):
         self.env.state[8] = 4
@@ -195,7 +200,7 @@ class AstroSmart(HandcodedTeammate):
         if self.last_state == self.state_mdp:
             a_joint = self.last_action
         else:
-            a_joint = JOINT_ACTION_SPACE[np.random.choice(range(len(JOINT_ACTION_SPACE)), p=self.p_joint[self.mdp.state_index(self.state_mdp)])]
+            a_joint = JOINT_ACTION_SPACE[np.random.choice(range(len(JOINT_ACTION_SPACE)), p=self.p_joint[self.check_index(self.state_mdp)])]
         #a_joint = JOINT_ACTION_SPACE[np.argmax(self.p_joint[self.mdp.state_index(self.state_mdp)])]
 
         self.last_state = copy.copy(self.state_mdp)
