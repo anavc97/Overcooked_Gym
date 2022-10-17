@@ -112,6 +112,23 @@ LAYOUTS = {
         ["X", " ", " ", " ", " ", " ", "B", "B", " ", "B", "B", "B", " ", "B", "X"],
         ["X", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", "B", "X"],
         ["X", "X", "X", "X", "X", "X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]
+    ]),
+    "Lab2": np.array([
+        ["D", "X", "X", "X", "X", "X", "X", "P", "X", "X", "X", "X", "X", "X","O"],
+        ["X", "B", " ", " ", " ", "B", "B", " ", " ", " ", "B", " "," ", " ", "X"],
+        ["X", "B", " ", "B", " ", "B", "B", " ", "B", " ", "B", " "," ", " ", "X"],
+        ["X", "B", " ", "B", " ", "B", "B", " ", "B", " ", "B", "B"," ", "B", "X"],
+        ["X", " ", " ", "B", " ", " ", "B", " ", "B", " ", "B", " "," ", " ", "X"],
+        ["X", " ", "B", "B", "B", "B", "B", "B", "B", " ", "B", " "," ", " ", "X"],
+        ["X", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "," ", " ", "X"],
+        ["X", " ", "B", "B", "B", "B", "B", " ", "B", "B", "B", "B","B", " ", "X"],
+        ["X", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "," ", " ", "X"],
+        ["X", " ", "B", "B", "B", "B", "B", "B", "B", "B", " ", "B"," ", " ", "X"],
+        ["X", " ", " ", " ", " ", "B", " ", " ", " ", " ", " ", "B"," ", " ", "X"],
+        ["X", " ", "B", "B", " ", " ", " ", "B", " ", " ", "B", " "," ", " ", "X"],
+        ["X", " ", " ", "B", "B", "B", "B", "B", " ", " ", "B", "B"," ", "B", "X"],
+        ["X", " ", " ", "B", " ", " ", " ", " ", " ", " ", "B", " "," ", " ", "X"],
+        ["X", "X", "X", "X", "X", "X", "X", "X", "X", "X", "X", "X","X", "X", "X"]
     ])
 }
 
@@ -146,6 +163,8 @@ class Overcooked(Env):
             self.onions = Onion_list([(8,1), (2,2), (12,9), (9,10)], [0,0,0,0])
         elif self.layout_name == "kitchen2":
             self.onions = Onion_list([(2,4), (4,4), (4,6)], [0,0,0])
+        elif self.layout_name == "Lab2":
+            self.onions = Onion_list([(1,6), (1,10), (2,8), (9,6), (10,11), (13,3), (13,10)], [0,0,0,0,0,0,0])
         self.j_a = None
 
         # OpenAI Gym
@@ -400,6 +419,9 @@ class Overcooked(Env):
         elif self.layout_name == "kitchen2":
             a1_cell = (1,1)
             a0_cell = (2,1)
+        elif self.layout_name == "Lab2":
+            a1_cell = (6,13)
+            a0_cell = (13,1)
         '''
         a1_cell = a0_cell
         while a0_cell == a1_cell:
@@ -420,7 +442,14 @@ class Overcooked(Env):
             balconies[1] = HOLDING_ONION #define onion initial pos
             balconies[4] = HOLDING_ONION
             balconies[6] = HOLDING_ONION
-  
+        if self.layout_name == "Lab2":
+            balconies[3] = HOLDING_ONION #define onion initial pos
+            balconies[8] = HOLDING_ONION
+            balconies[19] = HOLDING_ONION
+            balconies[44] = HOLDING_ONION
+            balconies[50] = HOLDING_ONION
+            balconies[63] = HOLDING_ONION
+            balconies[64] = HOLDING_ONION
         state = np.array([a0_row, a0_column, a1_row, a1_column, a0_heading, a1_heading, a0_hand, a1_hand, pan] + balconies)
         return state
 

@@ -45,10 +45,11 @@ single_agent = False
 render = True
 render_mode = "silent"  # Available: window (pop-up) and matplotlib (plt.imshow). Video rendering planned for the future.
 
-layout = "Lab"
+layout = "Lab2"
 env = Overcooked(layout=layout)
 #agent = HumanAgent(action_meanings=env.action_meanings, name="Player 1")  # 1 - selects robot; 0 - selects human
 teammate = AstroSmart(LAYOUTS[layout], 1, env=env)
+#teammate = AstroHandcoded(LAYOUTS[layout], 1, env=env)
 env = SingleAgentWrapper(env, teammate)
 state = env.reset()
 frame = np.rot90(env.render(render_mode))

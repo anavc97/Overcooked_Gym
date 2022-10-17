@@ -295,11 +295,12 @@ class StateVisualizer:
             for x_tile, tile in enumerate(row):
                 self.TERRAINS_IMG.blit_on_surface(surface, self._position_in_unscaled_pixels((x_tile, y_tile)), 
                 StateVisualizer.TILE_TO_FRAME_NAME[tile])
+                '''
                 if (x_tile == 5 and 11<=y_tile<=13)or (x_tile == 12 and 9<=y_tile<=13) or (y_tile == 13 and 6<=x_tile<=12) or (y_tile == 10 and 9<=x_tile<=13) or (y_tile == 9 and 12<=x_tile<=13) or (x_tile == 9 and y_tile == 9) or (x_tile == 8 and y_tile == 12):
                     surface.blit(self.ICE_IMG,self._position_in_unscaled_pixels((x_tile, y_tile)))
                     if x_tile == state[3] and y_tile == state[2] and state[8] == 1:
                         surface.blit(self.SLIP_IMG,self._position_in_unscaled_pixels((x_tile, y_tile)))
-
+                '''
                 
 
     def _position_in_unscaled_pixels(self, position):
