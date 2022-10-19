@@ -4,7 +4,7 @@ import pickle
 import itertools
 from yaaf import Timestep
 from yaaf.policies import deterministic_policy
-from overcooked2 import Overcooked, HOLDING_ONION, HOLDING_NOTHING, HOLDING_DISH, ACTION_MEANINGS
+from overcooked2 import Overcooked, HOLDING_ONION, HOLDING_NOTHING, HOLDING_DISH, ACTION_MEANINGS, LAYOUTS
 from teammates.HandcodedTeammate import HandcodedTeammate
 import time, random, copy
 import glob
@@ -18,7 +18,10 @@ print("READING FROM: ", log_file)
 OFFSETS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 agents = ['Human', 'Astro']
 S_COEF = 0.9 #prob of slipping
-STATE_MAP = np.array([
+STATE_MAPS = []
+ADJACENCY_MATRIXS = []
+#LAB STATE MAP
+STATE_MAPS[0] = np.array([
 ["2", "2", "2", "2", "2", "2", "2", "4", "7", "7", "7", "7", "7", "7", "7"],
 ["2", "2", "2", "2", "2", "2", "2", "4", "7", "7", "7", "7", "7", "7", "7"],
 ["2", "2", "2", "2", "2", "2", "2", "4", "4", "4", "7", "7", "7", "7", "7"],
@@ -35,7 +38,26 @@ STATE_MAP = np.array([
 ["0", "0", "0", "0", "0", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5"],
 ["0", "0", "0", "0", "0", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5"]])
 
-ADJACENCY_MATRIX = np.array(
+#LAB2 STATE MAP
+STATE_MAPS[1] = np.array([
+["5", "5", "5", "5", "5", "5", "5", "6", "6", "6", "6", "7", "7", "7", "7"],
+["5", "5", "5", "5", "5", "5", "5", "6", "6", "6", "6", "7", "7", "7", "7"],
+["5", "5", "5", "5", "5", "5", "5", "6", "6", "6", "6", "7", "7", "7", "7"],
+["5", "5", "5", "5", "5", "5", "5", "6", "6", "6", "6", "7", "7", "7", "7"],
+["5", "5", "5", "5", "5", "5", "5", "6", "6", "6", "6", "7", "7", "7", "7"],
+["5", "5", "5", "5", "5", "5", "5", "6", "6", "6", "6", "7", "7", "7", "7"],
+["5", "5", "5", "5", "5", "5", "8", "8", "8", "8", "8", "7", "7", "7", "7"],
+["4", "4", "4", "4", "4", "4", "8", "8", "8", "8", "3", "3", "3", "3", "3"],
+["4", "4", "4", "4", "4", "4", "8", "8", "8", "8", "3", "3", "3", "3", "3"],
+["4", "4", "4", "4", "4", "4", "2", "2", "2", "2", "3", "3", "3", "3", "3"],
+["0", "0", "2", "2", "2", "4", "2", "2", "2", "2", "3", "3", "3", "3", "3"],
+["0", "0", "0", "0", "2", "2", "2", "1", "1", "1", "3", "3", "3", "3", "3"],
+["0", "0", "0", "0", "1", "1", "1", "1", "1", "1", "1", "3", "3", "3", "3"],
+["0", "0", "0", "0", "1", "1", "1", "1", "1", "1", "1", "3", "3", "3", "3"],
+["0", "0", "0", "0", "1", "1", "1", "1", "1", "1", "1", "3", "3", "3", "3"]])
+
+#LAB AD_MAT
+ADJACENCY_MATRIXS[0] = np.array(
     [
         [0, 1, 0, 0, 0, 1, 0, 0],
         [1, 0, 1, 1, 0, 0, 0, 0],
@@ -47,6 +69,23 @@ ADJACENCY_MATRIX = np.array(
         [0, 0, 0, 0, 1, 0, 1, 0],
     ]
 )
+
+#LAB2 AD_MAT
+ADJACENCY_MATRIXS[1] = np.array(
+    [
+        [0, 0, 1, 0, 1, 0, 0, 0, 0],
+        [0, 0, 1, 1, 0, 0, 0, 0, 0],
+        [1, 1, 0, 1, 1, 0, 0, 0, 0],
+        [0, 1, 1, 0, 0, 0, 0, 1, 1],
+        [1, 0, 1, 0, 0, 1, 0, 0, 1],
+        [0, 0, 0, 0, 1, 0, 0, 0, 1],
+        [0, 0, 0, 0, 0, 0, 0, 1, 1],
+        [0, 0, 0, 1, 0, 0, 1, 0, 1],
+        [0, 0, 0, 1, 1, 1, 1, 1, 0],
+
+    ]
+)
+
 ACTION_MEANINGS_MDP = [
     "move to lower-index node",
     "move to second-lower-index node",
@@ -65,7 +104,9 @@ class AstroHandcoded(HandcodedTeammate):
     can make the soup and serving without having to fetch anything."""
 
     def __init__(self, layout, index, env=None):
-        super().__init__(layout, index)
+        super().__init__(LAYOUTS[layout], index)
+        self.layout = LAYOUTS[layout]
+        self.layout_name = layout
         self.num_rows, self.num_columns = self.layout.shape
         self.env = env
         self.onion_time = 0
@@ -150,18 +191,27 @@ class AstroSmart(HandcodedTeammate):
     can make the soup and serving without having to fetch anything."""
 
     def __init__(self, layout, index, env=None):
-        super().__init__(layout, index)
-        self.layout = layout
+        super().__init__(LAYOUTS[layout], index)
+        self.layout = LAYOUTS[layout]
+        self.layout_name = layout
         self.num_rows, self.num_columns = self.layout.shape
         self.env = env
         self.onion_time = 0
         self.curr_time = 0
         self.prev_time = 0
         self.balcony_contents = []
-        self.state_map = STATE_MAP
+        if self.layout_name == "Lab":
+            self.state_map = STATE_MAP[0]
+            self.ad_matrix = ADJACENCY_MATRIXS[0]
+            self.human_pos = [(13,2), (9,1), (2,3), (6,6), (8,8), (9,9), (13,9), (5,12)]
+            self.agent_pos = [(13,3), (7,2), (1,3), (7,5), (10,8), (12,8), (10,9), (4,10)]
+        elif self.layout_name == "Lab2":
+            self.state_map = STATE_MAP[1]
+            self.ad_matrix = ADJACENCY_MATRIXS[0]
+            self.human_pos = [(13,2), (9,1), (2,3), (6,6), (8,8), (9,9), (13,9), (5,12)]
+            self.agent_pos = [(12,2), (12,9), (10,7), (8,10), (9,1), (4,5), (2,7), (1,12)]
         self.onions = self.env.onions
-        self.human_pos = [(13,2), (9,1), (2,3), (6,6), (8,8), (9,9), (13,9), (5,12)]
-        self.agent_pos = [(13,3), (7,2), (1,3), (7,5), (10,8), (12,8), (10,9), (4,10)]
+
         self.dist = np.zeros(len(self.onions.pos))
         self.last_state = [10,10,10,10,10,10]
         self.last_action = 0
@@ -256,6 +306,8 @@ class AstroSmart(HandcodedTeammate):
                 action_env = self._action_to_move_to(state_env, self.human_pos[7])
 
         if self.index == 1: # ROBOT
+            action_env = self._action_to_move_to(state_env, self.agent_pos[node])
+            '''  
             if node == 0:
                 action_env = self._action_to_move_to(state_env, self.agent_pos[0])        
             elif node == 1:
@@ -272,7 +324,7 @@ class AstroSmart(HandcodedTeammate):
                 action_env = self._action_to_move_to(state_env, self.agent_pos[6], is_teammate_obstacle=False)
             elif node == 7:
                 action_env = self._action_to_move_to(state_env, self.agent_pos[7])
-        
+            '''
         return action_env
 
     def action_converter(self, state_env, state_mdp, action_mdp):
@@ -373,7 +425,7 @@ class AstroSmart(HandcodedTeammate):
                 pos = (state_env[0], state_env[1])
                 if pos in self.human_pos or self.target[self.index]:
                     self.target[self.index] = True
-                    adjacencies = np.where(ADJACENCY_MATRIX[self.state_mdp[1-self.index]] == 1)[0]
+                    adjacencies = np.where(self.ad_matrix[self.state_mdp[1-self.index]] == 1)[0]
                     downgrade_to_lower_index = int(action_mdp) >= len(adjacencies)
                     action_mdp = 0 if downgrade_to_lower_index else action_mdp
                     node = adjacencies[action_mdp]
@@ -400,7 +452,7 @@ class AstroSmart(HandcodedTeammate):
                                    
                 if pos in self.agent_pos or self.target[self.index] or min(self.dist) <= 1:
                     self.target[self.index] = True
-                    adjacencies = np.where(ADJACENCY_MATRIX[self.state_mdp[1-self.index]] == 1)[0]
+                    adjacencies = np.where(self.ad_matrix[self.state_mdp[1-self.index]] == 1)[0]
                     downgrade_to_lower_index = int(action_mdp) >= len(adjacencies)
                     action_mdp = 0 if downgrade_to_lower_index else action_mdp
                     node = adjacencies[action_mdp]
@@ -461,8 +513,8 @@ class AstroFake(HandcodedTeammate):
     can make the soup and serving without having to fetch anything."""
 
     def __init__(self, layout, index, env=None):
-        super().__init__(layout, index)
-        self.layout = layout
+        super().__init__(LAYOUTS[layout], index)
+        self.layout = LAYOUTS[layout]
         self.num_rows, self.num_columns = self.layout.shape
         self.env = env
         self.onion_time = 0

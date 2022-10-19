@@ -1,6 +1,6 @@
 # import pygame module in this program
 import pygame
-from overcooked2 import Overcooked, SingleAgentWrapper, LAYOUTS
+from overcooked2 import Overcooked, SingleAgentWrapper
 from yaaf.agents import HumanAgent
 from teammates.JackOfAllTrades import JackOfAllTrades
 from teammates.Astro import AstroHandcoded, AstroSmart, JOINT_ACTION_SPACE
@@ -48,8 +48,8 @@ render_mode = "silent"  # Available: window (pop-up) and matplotlib (plt.imshow)
 layout = "Lab2"
 env = Overcooked(layout=layout)
 #agent = HumanAgent(action_meanings=env.action_meanings, name="Player 1")  # 1 - selects robot; 0 - selects human
-teammate = AstroSmart(LAYOUTS[layout], 1, env=env)
-#teammate = AstroHandcoded(LAYOUTS[layout], 1, env=env)
+teammate = AstroSmart(layout, 1, env=env)
+#teammate = AstroHandcoded(layout, 1, env=env)
 env = SingleAgentWrapper(env, teammate)
 state = env.reset()
 frame = np.rot90(env.render(render_mode))
