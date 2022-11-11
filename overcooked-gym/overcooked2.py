@@ -108,26 +108,26 @@ LAYOUTS = {
         ["X", "B", " ", " ", " ", " ", " ", " ", " ", "B", "B", "B", "B", " ", "X"],
         ["X", " ", " ", " ", " ", " ", " ", " ", " ", " ", "B", "B", " ", " ", "X"],
         ["X", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", "X"],
-        ["X", " ", " ", " ", " ", " ", "B", "B", "B", "B", "B", "B", " ", "B", "X"],
-        ["X", " ", " ", " ", " ", " ", "B", "B", " ", "B", "B", "B", " ", "B", "X"],
-        ["X", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", "B", "X"],
+        ["X", " ", " ", " ", " ", "I", "B", "B", "B", "B", "B", "B", "I", "B", "X"],
+        ["X", " ", " ", " ", " ", "I", "B", "B", " ", "B", "B", "B", "I", "B", "X"],
+        ["X", " ", " ", " ", " ", "I", "I", "I", "I", "I", "I", "I", "I", "B", "X"],
         ["X", "X", "X", "X", "X", "X", "X", "X", "X", "X", "X", "X", "X", "X", "X"]
     ]),
     "Lab2": np.array([
         ["D", "X", "X", "X", "X", "X", "X", "P", "X", "X", "X", "X", "X", "X","O"],
-        ["X", "B", " ", " ", " ", "B", "B", " ", " ", " ", "B", " "," ", "B", "X"],
-        ["X", "B", " ", "B", " ", "B", "B", " ", "B", " ", " ", " "," ", " ", "X"],
-        ["X", "B", " ", "B", " ", "B", "B", " ", "B", " ", "B", "B","B", " ", "X"],
-        ["X", " ", " ", "B", " ", " ", "B", " ", "B", " ", "B", " "," ", " ", "X"],
-        ["X", " ", "B", "B", "B", "B", "B", "B", "B", " ", "B", " ","B", "B", "X"],
-        ["X", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "," ", " ", "X"],
-        ["X", " ", "B", "B", "B", "B", "B", " ", "B", "B", "B", "B","B", " ", "X"],
-        ["X", " ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "," ", " ", "X"],
-        ["X", " ", "B", "B", "B", "B", "B", "B", "B", "B", " ", "B"," ", " ", "X"],
-        ["X", " ", " ", " ", " ", "B", " ", " ", " ", " ", " ", "B"," ", " ", "X"],
-        ["X", " ", "B", "B", " ", " ", " ", "B", " ", " ", " ", " "," ", " ", "X"],
-        ["X", " ", " ", "B", "B", "B", "B", "B", " ", " ", "B", "B"," ", "B", "X"],
-        ["X", " ", " ", "B", " ", " ", " ", " ", " ", " ", "B", " "," ", " ", "X"],
+        ["X", " ", " ", " ", " ", " ", "B", "I", "B", "I", " ", "I","I", "I", "X"],
+        ["X", " ", "B", "B", "B", "B", "B", "I", "B", "I", "I", "I","I", "I", "X"],
+        ["X", " ", " ", " ", " ", " ", "B", "I", "B", "I", "B", "B","I", "I", "X"],
+        ["X", "B", "B", "B", " ", " ", "B", "I", "I", "I", "B", "B","I", "I", "X"],
+        ["X", " ", " ", " ", "B", " ", "B", "B", "B", "B", "B", "B"," ", "I", "X"],
+        ["X", " ", "B", " ", " ", " ", " ", " ", " ", " ", " ", " "," ", " ", "X"],
+        ["X", " ", "B", "B", "B", "B", "B", " ", "B", "B", "B", "B"," ", " ", "X"],
+        ["X", " ", "I", "I", "I", "I", "I", "I", "I", " ", "B", "B"," ", " ", "X"],
+        ["X", " ", "B", "B", "B", "B", "B", "B", "B", " ", "B", "B"," ", " ", "X"],
+        ["X", " ", " ", " ", " ", "B", " ", " ", " ", " ", " ", " "," ", " ", "X"],
+        ["X", "I", "B", "B", " ", " ", " ", "B", " ", " ", " ", " "," ", " ", "X"],
+        ["X", "I", " ", "B", "B", "B", "B", "B", "I", " ", "B", "B"," ", "B", "X"],
+        ["X", "I", "I", "B", " ", " ", " ", " ", "I", "I", "B", " "," ", " ", "X"],
         ["X", "X", "X", "X", "X", "X", "X", "X", "X", "X", "X", "X","X", "X", "X"]
     ])
 }
@@ -164,7 +164,7 @@ class Overcooked(Env):
         elif self.layout_name == "kitchen2":
             self.onions = Onion_list([(2,4), (4,4), (4,6)], [0,0,0])
         elif self.layout_name == "Lab2":
-            self.onions = Onion_list([(1,6), (1,10), (2,8), (9,6), (10,11), (13,3), (13,10)], [0,0,0,0,0,0,0])
+            self.onions = Onion_list([(13,3), (13,10), (1,6), (3,8)], [0,0,0,0])
         self.j_a = None
 
         # OpenAI Gym
@@ -360,7 +360,7 @@ class Overcooked(Env):
 
             # TODO fix out of bounds error when indexing numpy array with values larger than rows/columns and lower than zero
             # in_bounds = next_row < self.layout.shape[0] and next_column < self.layout.shape[1]
-            walking_area = self.layout[next_row, next_column] == ' '
+            walking_area = (self.layout[next_row, next_column] == ' ' or self.layout[next_row, next_column] == 'I')
             blocked_by_teammate = teammate_row == next_row and teammate_column == next_column
 
             if walking_area and not blocked_by_teammate:
@@ -420,7 +420,7 @@ class Overcooked(Env):
             a1_cell = (1,1)
             a0_cell = (2,1)
         elif self.layout_name == "Lab2":
-            a1_cell = (6,13)
+            a1_cell = (9,1)
             a0_cell = (13,1)
         '''
         a1_cell = a0_cell
@@ -443,13 +443,10 @@ class Overcooked(Env):
             balconies[4] = HOLDING_ONION
             balconies[6] = HOLDING_ONION
         if self.layout_name == "Lab2":
-            balconies[3] = HOLDING_ONION #define onion initial pos
-            balconies[8] = HOLDING_ONION
-            balconies[19] = HOLDING_ONION
-            balconies[44] = HOLDING_ONION
-            balconies[50] = HOLDING_ONION
-            balconies[63] = HOLDING_ONION
-            balconies[64] = HOLDING_ONION
+            balconies[0] = HOLDING_ONION #define onion initial pos
+            balconies[9] = HOLDING_ONION
+            balconies[58] = HOLDING_ONION
+            balconies[59] = HOLDING_ONION
         state = np.array([a0_row, a0_column, a1_row, a1_column, a0_heading, a1_heading, a0_hand, a1_hand, pan] + balconies)
         return state
 

@@ -4,7 +4,10 @@ from overcooked2 import Overcooked, SingleAgentWrapper, LAYOUTS
 from teammates.Astro import AstroHandcoded, AstroSmart
 import pickle
 
-STATE_MAP = np.array([
+STATE_MAPS = []
+ADJACENCY_MATRIXS = []
+#LAB STATE MAP
+STATE_MAPS.append(np.array([
 ["2", "2", "2", "2", "2", "2", "2", "4", "7", "7", "7", "7", "7", "7", "7"],
 ["2", "2", "2", "2", "2", "2", "2", "4", "7", "7", "7", "7", "7", "7", "7"],
 ["2", "2", "2", "2", "2", "2", "2", "4", "4", "4", "7", "7", "7", "7", "7"],
@@ -19,19 +22,28 @@ STATE_MAP = np.array([
 ["0", "0", "0", "0", "0", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5"],
 ["0", "0", "0", "0", "0", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5"],
 ["0", "0", "0", "0", "0", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5"],
-["0", "0", "0", "0", "0", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5"]])
+["0", "0", "0", "0", "0", "5", "5", "5", "5", "5", "5", "5", "5", "5", "5"]]))
 
-ACTION_MEANINGS = [
-    "move to lower-index node",
-    "move to second-lower-index node",
-    "move to third-lower-index node",
-    "move to fourth-lower-index node",
-    "stay",
-    "act"
-]
-S_COEF = 0.2
+#LAB2 STATE MAP
+STATE_MAPS.append(np.array([
+["5", "5", "5", "5", "5", "5", "5", "6", "6", "6", "6", "7", "7", "7", "7"],
+["5", "5", "5", "5", "5", "5", "5", "6", "6", "6", "6", "7", "7", "7", "7"],
+["5", "5", "5", "5", "5", "5", "5", "6", "6", "6", "6", "7", "7", "7", "7"],
+["5", "5", "5", "5", "5", "5", "5", "6", "6", "6", "6", "7", "7", "7", "7"],
+["5", "5", "5", "5", "5", "5", "5", "6", "6", "6", "6", "7", "7", "7", "7"],
+["5", "5", "5", "5", "5", "5", "5", "6", "6", "6", "6", "7", "7", "7", "7"],
+["5", "5", "5", "5", "5", "5", "8", "8", "8", "8", "8", "7", "7", "7", "7"],
+["4", "4", "4", "4", "4", "4", "8", "8", "8", "8", "3", "3", "3", "3", "3"],
+["4", "4", "4", "4", "4", "4", "8", "8", "8", "8", "3", "3", "3", "3", "3"],
+["4", "4", "4", "4", "4", "4", "2", "2", "2", "2", "3", "3", "3", "3", "3"],
+["0", "0", "2", "2", "2", "4", "2", "2", "2", "2", "3", "3", "3", "3", "3"],
+["0", "0", "0", "0", "2", "2", "2", "1", "1", "1", "3", "3", "3", "3", "3"],
+["0", "0", "0", "0", "1", "1", "1", "1", "1", "1", "1", "3", "3", "3", "3"],
+["0", "0", "0", "0", "1", "1", "1", "1", "1", "1", "1", "3", "3", "3", "3"],
+["0", "0", "0", "0", "1", "1", "1", "1", "1", "1", "1", "3", "3", "3", "3"]]))
 
-ADJACENCY_MATRIX = np.array(
+#LAB AD_MAT
+ADJACENCY_MATRIXS.append(np.array(
     [
         [0, 1, 0, 0, 0, 1, 0, 0],
         [1, 0, 1, 1, 0, 0, 0, 0],
@@ -42,17 +54,63 @@ ADJACENCY_MATRIX = np.array(
         [0, 0, 0, 0, 1, 1, 0, 1],
         [0, 0, 0, 0, 1, 0, 1, 0],
     ]
-)
+))
+
+#LAB2 AD_MAT
+ADJACENCY_MATRIXS.append(np.array(
+    [
+        [0, 0, 1, 0, 1, 0, 0, 0, 0],
+        [0, 0, 1, 1, 0, 0, 0, 0, 0],
+        [1, 1, 0, 1, 0, 0, 0, 0, 1],
+        [0, 1, 1, 0, 0, 0, 0, 1, 0],
+        [1, 0, 0, 0, 0, 1, 0, 0, 1],
+        [0, 0, 0, 0, 1, 0, 0, 0, 1],
+        [0, 0, 0, 0, 0, 0, 0, 1, 0],
+        [0, 0, 0, 1, 0, 0, 1, 0, 1],
+        [0, 0, 1, 0, 1, 1, 0, 1, 0],
+
+    ]
+))
+
+ACTION_MEANINGS_MDP = []
+
+ACTION_MEANINGS_MDP.append([
+    "move to lower-index node",
+    "move to second-lower-index node",
+    "move to third-lower-index node",
+    "move to fourth-lower-index node",
+    "stay",
+    "act"
+])
+
+ACTION_MEANINGS_MDP.append([
+    "move to lower-index node",
+    "move to second-lower-index node",
+    "move to third-lower-index node",
+    "move to fourth-lower-index node",
+    "stay",
+    "act"
+])
+S_COEF = 0
+
+#LAB
+#ADJACENCY_MATRIX = ADJACENCY_MATRIXS[0]
+#LAB2
+ADJACENCY_MATRIX = ADJACENCY_MATRIXS[1]
+
+#LAB
+#ACTION_MEANINGS = ACTION_MEANINGS_MDP[0]
+#LAB2
+ACTION_MEANINGS = ACTION_MEANINGS_MDP[1]
 
 f = open("output.txt", 'w')
 
 def find_node(state_mdp, action_mdp):
     
-    if action_mdp == 4:
+    if action_mdp == 5:
         return state_mdp[1]
     
     adjacencies = np.where(ADJACENCY_MATRIX[state_mdp[1]] == 1)[0]
-
     downgrade_to_lower_index = int(action_mdp) >= len(adjacencies)
     action_mdp = 0 if downgrade_to_lower_index else action_mdp
     node = adjacencies[action_mdp]
@@ -65,15 +123,15 @@ if __name__ == '__main__':
     render = True
     render_mode = "plt"  # Available: window (pop-up) and matplotlib (plt.imshow). Video rendering planned for the future.
     num_actions = 4 # Actions to move to x-lower index node (all except "stay" and "act")
-    num_nodes = 8
-    layout = "Lab"
+    num_nodes = 9
+    layout = "Lab2"
     
 
     if single_agent:
         # Option 1
         env = Overcooked(layout=layout)
-        agent = AstroSmart(LAYOUTS[layout], 0, env=env)
-        teammate = AstroSmart(LAYOUTS[layout], 1, env=env) # 0 - selects Human; 1 - selects Robot 
+        agent = AstroSmart(layout, 0, env=env)
+        teammate = AstroSmart(layout, 1, env=env) # 0 - selects Human; 1 - selects Robot 
         env = SingleAgentWrapper(env, teammate)
         transitions = np.zeros((num_actions, num_nodes, num_nodes))
         state = env.reset()
@@ -85,8 +143,8 @@ if __name__ == '__main__':
 
         for h in range(0,4):
             for ac in range(0, num_actions):
-                for a in range(0,len(STATE_MAP)):
-                    for b in range(0,len(STATE_MAP[a])):
+                for a in range(0,len(STATE_MAPS[1])):
+                    for b in range(0,len(STATE_MAPS[1][a])):
                         if scene[a,b] == " ":
                             env.env.state[0] = a
                             env.env.state[1] = b
@@ -95,6 +153,7 @@ if __name__ == '__main__':
                         
                         state_mdp = agent.state_converter(env.env.state[:9])
                         target_node = find_node(state_mdp, ac)
+                        print("Converting action")
                         action = agent.action_converter(env.env.state, state_mdp, ac)
                         env.env.state[4] = h
                         print("HEADING: ", env.env.state[4], file=f) 
@@ -121,7 +180,7 @@ if __name__ == '__main__':
                 if np.all((transitions[:,x,y] == 0)):
                     print("Transition from node ", x, " to node ", y, " is not possible.")
 
-        with open("/home/anavc/Simulator/simulator/decision/transitions_robot.pickle", "wb") as a:
+        with open("/home/anavc/Simulator/simulator/decision/transitions_human_{}.pickle".format(layout), "wb") as a:
                     pickle.dump(transitions, a)
 
         f.close()

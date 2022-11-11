@@ -1,10 +1,14 @@
-import pickle
+from numpy import ndarray
 import numpy as np
+import pickle
+
+MAP = "Lab"
 
 with open("/home/anavc/Overcooked_Gym/overcooked-gym/mmdp.pickle", "rb") as f:
     mdp = pickle.load(f)
-    print("Opening MDP")
 
+print("Loaded MDP")
+np.save("/home/anavc/Overcooked_Gym/overcooked-gym/policy_{}".format(MAP), mdp.policy)
 
 def generate_states():
 
@@ -41,6 +45,4 @@ for s_mdp in states:
 
 print(len(mdp_ind))
 
-
-f = open("/home/anavc/Overcooked_Gym/overcooked-gym/mdp_ind.pickle","wb")
-pickle.dump(mdp_ind, f)
+np.save("/home/anavc/Overcooked_Gym/overcooked-gym/mdp_ind_{}".format(MAP), mdp_ind)

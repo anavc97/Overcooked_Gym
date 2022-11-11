@@ -11,9 +11,10 @@ TOMATO_DISPENSER = 'T'
 POT = 'P'
 DISH_DISPENSER = 'D'
 SERVING_LOC = 'S'
+ICE = 'I'
 
 CODE_TO_TYPE = {0: EMPTY, 1: COUNTER, 2: ONION_DISPENSER, 3: TOMATO_DISPENSER, 4: POT, 5: DISH_DISPENSER,
-                6: SERVING_LOC}
+                6: SERVING_LOC, 7:ICE}
 TYPE_TO_CODE = {v: k for k, v in CODE_TO_TYPE.items()}
 
 
@@ -407,14 +408,14 @@ class Grid(object):
             return False
 
         # If location is next to at least one empty square
-        if any([loc for loc in self.get_near_locations(location) if CODE_TO_TYPE[self.terrain_at_loc(loc)] == EMPTY]):
+        if any([loc for loc in self.get_near_locations(location) if (CODE_TO_TYPE[self.terrain_at_loc(loc)] == EMPTY or CODE_TO_TYPE[self.terrain_at_loc(loc)] == ICE)]):
             return True
         else:
             return False
 
     def location_is_empty(self, location):
         x, y = location
-        return self.mtx[x][y] == TYPE_TO_CODE[EMPTY]
+        return (self.mtx[x][y] == TYPE_TO_CODE[EMPTY] or self.mtx[x][y] == TYPE_TO_CODE[ICE])
 
     def get_random_interior_location(self):
         rand_x = np.random.randint(low=1, high=self.shape[0] - 1)

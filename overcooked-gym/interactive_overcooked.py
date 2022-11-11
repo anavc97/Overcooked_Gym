@@ -3,7 +3,7 @@ import pygame
 from overcooked2 import Overcooked, SingleAgentWrapper
 from yaaf.agents import HumanAgent
 from teammates.JackOfAllTrades import JackOfAllTrades
-from teammates.Astro import AstroHandcoded, AstroSmart, JOINT_ACTION_SPACE
+from teammates.Astro import AstroHandcoded, AstroSmart
 import numpy as np
 import time
 from PIL import Image
@@ -125,13 +125,13 @@ while not terminal:
 
         if event.type == new_frame or action == None:
             #action = agent.action(state)
-            print("Time passed")
+            #print("Time passed")
             action = 5
 
         if event.type == pygame.KEYDOWN:
             #pygame.time.set_timer(new_frame, 0)
             #pygame.time.set_timer(new_frame, MPF)
-            print("Key Pressed")
+            #print("Key Pressed")
             if event.key == pygame.K_UP:
                 action = 0
 

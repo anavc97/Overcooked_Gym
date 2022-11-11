@@ -2,7 +2,7 @@ import pygame
 import os, copy, math
 from overcooked_ai_py.utils import generate_temporary_file_path, cumulative_rewards_from_rew_list
 from overcooked_ai_py.static import GRAPHICS_DIR, FONTS_DIR
-from overcooked_ai_py.mdp.layout_generator import EMPTY, COUNTER, ONION_DISPENSER, TOMATO_DISPENSER, POT, DISH_DISPENSER, SERVING_LOC
+from overcooked_ai_py.mdp.layout_generator import EMPTY, COUNTER, ONION_DISPENSER, TOMATO_DISPENSER, POT, DISH_DISPENSER, SERVING_LOC, ICE
 from overcooked_ai_py.visualization.pygame_utils import MultiFramePygameImage, run_static_resizeable_window, \
     scale_surface_by_factor, blit_on_new_surface_of_size, vstack_surfaces
 from overcooked_ai_py.visualization.visualization_utils import show_image_in_ipython, show_ipython_images_slider
@@ -60,7 +60,8 @@ class StateVisualizer:
         TOMATO_DISPENSER: "tomatoes",
         POT: "pot",
         DISH_DISPENSER: "dishes",
-        SERVING_LOC: "serve"
+        SERVING_LOC: "serve",
+        ICE: "ice"
     }
 
     def __init__(self, **kwargs):
@@ -294,13 +295,9 @@ class StateVisualizer:
         for y_tile, row in enumerate(grid):
             for x_tile, tile in enumerate(row):
                 self.TERRAINS_IMG.blit_on_surface(surface, self._position_in_unscaled_pixels((x_tile, y_tile)), 
-                StateVisualizer.TILE_TO_FRAME_NAME[tile])
-                '''
-                if (x_tile == 5 and 11<=y_tile<=13)or (x_tile == 12 and 9<=y_tile<=13) or (y_tile == 13 and 6<=x_tile<=12) or (y_tile == 10 and 9<=x_tile<=13) or (y_tile == 9 and 12<=x_tile<=13) or (x_tile == 9 and y_tile == 9) or (x_tile == 8 and y_tile == 12):
-                    surface.blit(self.ICE_IMG,self._position_in_unscaled_pixels((x_tile, y_tile)))
-                    if x_tile == state[3] and y_tile == state[2] and state[8] == 1:
-                        surface.blit(self.SLIP_IMG,self._position_in_unscaled_pixels((x_tile, y_tile)))
-                '''
+                    StateVisualizer.TILE_TO_FRAME_NAME[tile])
+                if tile == 'I' and x_tile == state[3] and y_tile == state[2] and state[8] == 1:
+                    surface.blit(self.SLIP_IMG,self._position_in_unscaled_pixels((x_tile, y_tile)))
                 
 
     def _position_in_unscaled_pixels(self, position):
