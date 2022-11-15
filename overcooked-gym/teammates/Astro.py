@@ -16,7 +16,7 @@ log_file = f"logfile_AstroHuman_{fileCounter-1}.pickle"
 
 OFFSETS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 agents = ['Human', 'Astro']
-S_COEF = 0.0 #prob of slipping
+S_COEF = 0.9 #prob of slipping
 STATE_MAPS = []
 ADJACENCY_MATRIXS = []
 #LAB STATE MAP

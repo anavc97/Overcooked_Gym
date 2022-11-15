@@ -67,16 +67,30 @@ white = (255, 255, 255)
 GREY = (100,100,100)
 BG = pygame.image.load("/home/anavc/Overcooked_Gym/overcooked-gym/overcooked_ai_py/data/graphics/Background.png")
 
-def fade_in_text(txt_list):
+def fade_in_text(txt_list, dec):
     for txt in txt_list:
         display_surface.blit(txt[0], txt[1])
         if txt[0].get_alpha() <=0:
             txt_list.remove(txt)
-        else: txt[0].set_alpha(txt[0].get_alpha()-50)  
+        else: txt[0].set_alpha(txt[0].get_alpha()-dec)
+    
+    if len(txt_list)>200:
+        del txt_list[-100:] 
+
+def valid_id():
+    i = 0
+    if not user_id == '':
+        i = len(glob.glob1("/home/anavc/Overcooked_Gym/overcooked-gym/logfiles/", "logfile_{}_*".format(user_id)))
+        print(i)
+    if  i > 0:
+        return False
+    return user_id.isalnum()
 
 def main_menu():
 
     global user_id
+
+    invalid_txt_list = []
 
     while not GAME_OVER:
         display_surface.fill(white)
@@ -85,17 +99,19 @@ def main_menu():
         MENU_MOUSE_POS = pygame.mouse.get_pos()
 
         MENU_TEXT = get_font(50).render("TOXIC WASTE GAME", True, "#b68f40")
-        MENU_RECT = MENU_TEXT.get_rect(center=(450, 150))
+        MENU_RECT = MENU_TEXT.get_rect(center=(455, 150))
         
         MENU_TEXT2 = get_font(30).render("ENTER ID: ", True, "#d7fcd4")
-        MENU_RECT2 = MENU_TEXT.get_rect(center=(450, 250))
+        MENU_RECT2 = MENU_TEXT.get_rect(center=(455, 250))
 
         MENU_TEXT3 = get_font(30).render(user_id, True, "#d7fcd4")
         MENU_RECT3 = MENU_TEXT.get_rect(center=(750, 250))
+        
+        MENU_TEXT4 = get_font(30).render("INVALID USER ID", True, "#ff0000")
 
-        PLAY_BUTTON = Button(image=pygame.image.load("/home/anavc/Overcooked_Gym/overcooked-gym/overcooked_ai_py/data/graphics/Play Rect.png"), pos=(450, 400), 
+        PLAY_BUTTON = Button(image=pygame.image.load("/home/anavc/Overcooked_Gym/overcooked-gym/overcooked_ai_py/data/graphics/Play Rect.png"), pos=(455, 400), 
                             text_input="TUTORIAL", font=get_font(35), base_color="#d7fcd4", hovering_color="White")
-        QUIT_BUTTON = Button(image=pygame.image.load("/home/anavc/Overcooked_Gym/overcooked-gym/overcooked_ai_py/data/graphics/Quit Rect.png"), pos=(450, 550), 
+        QUIT_BUTTON = Button(image=pygame.image.load("/home/anavc/Overcooked_Gym/overcooked-gym/overcooked_ai_py/data/graphics/Quit Rect.png"), pos=(455, 550), 
                             text_input="QUIT", font=get_font(35), base_color="#d7fcd4", hovering_color="White")
 
         display_surface.blit(MENU_TEXT, MENU_RECT)
@@ -114,17 +130,25 @@ def main_menu():
                 if event.key == pygame.K_BACKSPACE: user_id = user_id[:-1]
                 else: user_id += event.unicode
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
-                    play_tutorial()
+                if valid_id():
+                    if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
+                        play_tutorial()
+                else:
+                    pos = (250, 300)
+                    txt_surf = MENU_TEXT4.copy()
+                    txt_surf.set_alpha(200)
+                    invalid_txt_list.append([txt_surf,pos])
+                    
                 if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
                     pygame.quit()
                     sys.exit()
 
+        fade_in_text(invalid_txt_list, 5)
         pygame.display.update()
+        clock.tick(60)
 
 def play_tutorial():
     layout = "kitchen2"
-    print("ID: ", user_id)
     env = Overcooked(layout=layout)
     #agent = HumanAgent(action_meanings=env.action_meanings, name="Player 1")  # 1 - selects robot; 0 - selects human
     teammate = AstroHandcoded(layout, 1, env=env)
@@ -209,7 +233,7 @@ def play_tutorial():
                 txt_surf = orig_surf.copy()
                 txt_surf.set_alpha(200)
                 txt_list.append([txt_surf,pos])
-            fade_in_text(txt_list)
+            fade_in_text(txt_list, 50)
 
             pygame.display.update()
     
@@ -223,12 +247,12 @@ def mid_screen0_1():
 
         MENU_MOUSE_POS = pygame.mouse.get_pos()
 
-        MENU_TEXT = get_font(50).render("Ready for Level 1?", True, "#b68f40")
-        MENU_RECT = MENU_TEXT.get_rect(center=(450, 200))
+        MENU_TEXT = get_font(40).render("READY FOR LEVEL 1?", True, "#b68f40")
+        MENU_RECT = MENU_TEXT.get_rect(center=(455, 220))
 
-        PLAY_BUTTON = Button(image=pygame.image.load("/home/anavc/Overcooked_Gym/overcooked-gym/overcooked_ai_py/data/graphics/Play Rect.png"), pos=(450, 400), 
+        PLAY_BUTTON = Button(image=pygame.image.load("/home/anavc/Overcooked_Gym/overcooked-gym/overcooked_ai_py/data/graphics/Quit Rect.png"), pos=(455, 350), 
                             text_input="LEVEL 1", font=get_font(35), base_color="#d7fcd4", hovering_color="White")
-        QUIT_BUTTON = Button(image=pygame.image.load("/home/anavc/Overcooked_Gym/overcooked-gym/overcooked_ai_py/data/graphics/Quit Rect.png"), pos=(450, 550), 
+        QUIT_BUTTON = Button(image=pygame.image.load("/home/anavc/Overcooked_Gym/overcooked-gym/overcooked_ai_py/data/graphics/Quit Rect.png"), pos=(455, 500), 
                             text_input="TUTORIAL", font=get_font(35), base_color="#d7fcd4", hovering_color="White")
 
         display_surface.blit(MENU_TEXT, MENU_RECT)
@@ -345,7 +369,7 @@ def play_lvl1():
                 txt_surf = orig_surf.copy()
                 txt_surf.set_alpha(200)
                 txt_list.append([txt_surf,pos])
-            fade_in_text(txt_list)
+            fade_in_text(txt_list, 50)
 
             pygame.display.update()
 
@@ -368,29 +392,33 @@ def mid_screen1_2(onion_time, game_time, score):
 
         MENU_MOUSE_POS = pygame.mouse.get_pos()
 
-        MENU_TEXT = get_font(50).render("Level 1 completed", True, "#b68f40")
-        MENU_RECT = MENU_TEXT.get_rect(center=(450, 100))
+        MENU_TEXT = get_font(47).render("LEVEL 1 COMPLETED", True, "#b68f40")
+        MENU_RECT = MENU_TEXT.get_rect(center=(455, 100))
 
         MENU_TEXT2 = get_font(30).render("GAME TIME: {}".format(round(game_time,1)), True, "#b68f40")
-        MENU_RECT2 = MENU_TEXT2.get_rect(center=(450, 200))
+        MENU_RECT2 = MENU_TEXT2.get_rect(center=(455, 250))
 
-        MENU_TEXT3 = get_font(25).render("TIME WITH ONION IN HAND: {}".format(round(onion_time,1)), True, "#b68f40")
-        MENU_RECT3 = MENU_TEXT2.get_rect(center=(450, 300))
+        MENU_TEXT3 = get_font(30).render("TIME WITH ONION ", True, "#b68f40")
+        MENU_RECT3 = MENU_TEXT2.get_rect(center=(455, 320))
 
         MENU_TEXT4 = get_font(30).render("SCORE: {}".format(round(score,1)), True, "#b68f40")
-        MENU_RECT4 = MENU_TEXT2.get_rect(center=(450, 400))
+        MENU_RECT4 = MENU_TEXT2.get_rect(center=(455, 420))
 
-        PLAY_BUTTON = Button(image=pygame.image.load("/home/anavc/Overcooked_Gym/overcooked-gym/overcooked_ai_py/data/graphics/Play Rect.png"), pos=(450, 500), 
-                            text_input="LEVEL 2", font=get_font(34), base_color="#d7fcd4", hovering_color="White")
-        QUIT_BUTTON = Button(image=pygame.image.load("/home/anavc/Overcooked_Gym/overcooked-gym/overcooked_ai_py/data/graphics/Quit Rect.png"), pos=(450, 600), 
-                            text_input="LEVEL 1", font=get_font(34), base_color="#d7fcd4", hovering_color="White")
+        MENU_TEXT5 = get_font(30).render("IN HAND: {}".format(round(onion_time,1)), True, "#b68f40")
+        MENU_RECT5 = MENU_TEXT2.get_rect(center=(455, 350))
+
+        PLAY_BUTTON = Button(image=pygame.image.load("/home/anavc/Overcooked_Gym/overcooked-gym/overcooked_ai_py/data/graphics/Play Rect.png"), pos=(455, 550), 
+                            text_input="LEVEL 2", font=get_font(40), base_color="#d7fcd4", hovering_color="White")
+        #QUIT_BUTTON = Button(image=pygame.image.load("/home/anavc/Overcooked_Gym/overcooked-gym/overcooked_ai_py/data/graphics/Quit Rect.png"), pos=(455, 650), 
+        #                    text_input="LEVEL 1", font=get_font(40), base_color="#d7fcd4", hovering_color="White")
 
         display_surface.blit(MENU_TEXT, MENU_RECT)
         display_surface.blit(MENU_TEXT2, MENU_RECT2)
         display_surface.blit(MENU_TEXT3, MENU_RECT3)
         display_surface.blit(MENU_TEXT4, MENU_RECT4)
+        display_surface.blit(MENU_TEXT5, MENU_RECT5)
 
-        for button in [PLAY_BUTTON, QUIT_BUTTON]:
+        for button in [PLAY_BUTTON]:
             button.changeColor(MENU_MOUSE_POS)
             button.update(display_surface)
         
@@ -401,9 +429,9 @@ def mid_screen1_2(onion_time, game_time, score):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
                     play_lvl2()
-                if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
-                    play_lvl1()
-                    sys.exit()
+                #if QUIT_BUTTON.checkForInput(MENU_MOUSE_POS):
+                #    play_lvl1()
+                #    sys.exit()
 
         pygame.display.update()
 
@@ -502,7 +530,7 @@ def play_lvl2():
                 txt_surf = orig_surf.copy()
                 txt_surf.set_alpha(200)
                 txt_list.append([txt_surf,pos])
-            fade_in_text(txt_list)
+            fade_in_text(txt_list, 50)
 
             pygame.display.update()
 
@@ -526,22 +554,25 @@ def game_over(onion_time, game_time, score):
 
         MENU_MOUSE_POS = pygame.mouse.get_pos()
 
-        MENU_TEXT = get_font(50).render("GAME OVER", True, "#b68f40")
-        MENU_RECT = MENU_TEXT.get_rect(center=(450, 50))
+        MENU_TEXT = get_font(50).render("GAME COMPLETE", True, "#b68f40")
+        MENU_RECT = MENU_TEXT.get_rect(center=(455, 100))
 
         MENU_TEXT2 = get_font(30).render("GAME TIME: {}".format(round(game_time,1)), True, "#b68f40")
-        MENU_RECT2 = MENU_TEXT2.get_rect(center=(450, 150))
+        MENU_RECT2 = MENU_TEXT2.get_rect(center=(455, 210))
 
-        MENU_TEXT3 = get_font(25).render("TIME WITH ONION IN HAND: {}".format(round(onion_time,1)), True, "#b68f40")
-        MENU_RECT3 = MENU_TEXT2.get_rect(center=(450, 250))
+        MENU_TEXT3 = get_font(30).render("TIME WITH ONION ", True, "#b68f40")
+        MENU_RECT3 = MENU_TEXT2.get_rect(center=(455, 280))
 
         MENU_TEXT4 = get_font(30).render("SCORE: {}".format(round(score,1)), True, "#b68f40")
-        MENU_RECT4 = MENU_TEXT2.get_rect(center=(450, 350))
+        MENU_RECT4 = MENU_TEXT2.get_rect(center=(455, 380))
 
-        MENU_TEXT5 = get_font(30).render("COMPLETION CODE: {}".format(COMPLETION_CODE), True, "#b68f40")
-        MENU_RECT5 = MENU_TEXT2.get_rect(center=(450, 450))
+        MENU_TEXT5 = get_font(30).render("IN HAND: {}".format(round(onion_time,1)), True, "#b68f40")
+        MENU_RECT5 = MENU_TEXT2.get_rect(center=(455, 310))
 
-        QUIT_BUTTON = Button(image=pygame.image.load("/home/anavc/Overcooked_Gym/overcooked-gym/overcooked_ai_py/data/graphics/Quit Rect.png"), pos=(550, 650), 
+        MENU_TEXT6 = get_font(20).render("COMPLETION CODE: {}".format(COMPLETION_CODE), True, "#b68f40")
+        MENU_RECT6 = MENU_TEXT2.get_rect(center=(455, 450))
+
+        QUIT_BUTTON = Button(image=pygame.image.load("/home/anavc/Overcooked_Gym/overcooked-gym/overcooked_ai_py/data/graphics/Quit Rect.png"), pos=(455, 570), 
                             text_input="QUIT", font=get_font(40), base_color="#d7fcd4", hovering_color="White")
 
         display_surface.blit(MENU_TEXT, MENU_RECT)
@@ -549,7 +580,8 @@ def game_over(onion_time, game_time, score):
         display_surface.blit(MENU_TEXT3, MENU_RECT3)
         display_surface.blit(MENU_TEXT4, MENU_RECT4)
         display_surface.blit(MENU_TEXT5, MENU_RECT5)
-
+        display_surface.blit(MENU_TEXT6, MENU_RECT6)
+        
         for button in [QUIT_BUTTON]:
             button.changeColor(MENU_MOUSE_POS)
             button.update(display_surface)

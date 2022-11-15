@@ -44,8 +44,6 @@ LOWEST_VALUE = 4    # SOUP_READY
 fileCounter = len(glob.glob1("/home/anavc/Overcooked_Gym/overcooked-gym/","logfile_AstroHuman_*"))
 
 log_file = f"logfile_AstroHuman_{fileCounter-1}.pickle"
-print("READING FROM: ", log_file)
-
 
 
 """
@@ -255,7 +253,7 @@ class Overcooked(Env):
                 print("RFID: Beep!")
             # Nothing
             
-            elif descriptor == 'X' or descriptor == ' ':
+            elif descriptor == 'X' or descriptor == ' ' or descriptor == 'I':
                 next_hand = hand
 
             # Kitchen balcony
