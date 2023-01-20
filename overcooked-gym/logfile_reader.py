@@ -3,8 +3,9 @@ import pygame
 from overcooked2 import Overcooked, SingleAgentWrapper, LAYOUTS
 from yaaf.agents import HumanAgent
 from teammates.JackOfAllTrades import JackOfAllTrades
-from teammates.Astro import AstroHandcoded, AstroSmart, AstroFake, JOINT_ACTION_SPACE
+from teammates.Astro import AstroHandcoded, AstroSmart, AstroFake, ACTION_MEANINGS_MDP, log_file, LVL
 import numpy as np
+import itertools
 import time
 from PIL import Image
 import glob
@@ -12,10 +13,9 @@ import pickle
 import copy
 
 
-fileCounter = len(glob.glob1("/home/anavc/Overcooked_Gym/overcooked-gym/","logfile_AstroHuman_*"))
-
 log = []
-log_file = f"logfile_AstroHuman_{fileCounter-1}.pickle"
+ACTION_SPACE = tuple(range(len(ACTION_MEANINGS_MDP[LVL-1])))
+JOINT_ACTION_SPACE = list(itertools.product(ACTION_SPACE, repeat=2))
 print("READING FROM: ", log_file)
 
 class LogFrame:
@@ -59,10 +59,10 @@ single_agent = False
 render = True
 render_mode = "silent"  # Available: window (pop-up) and matplotlib (plt.imshow). Video rendering planned for the future.
 
-layout = "Lab2"
+layout = f"Lab{LVL}"
 env = Overcooked(layout=layout)
 #agent = HumanAgent(action_meanings=env.action_meanings, name="Player 1")  # 1 - selects robot; 0 - selects human
-teammate = AstroFake(LAYOUTS[layout], 1, env=env)
+teammate = AstroFake(layout, 1, env=env)
 env = SingleAgentWrapper(env, teammate)
 state = env.reset()
 frame = np.rot90(env.render(render_mode))
@@ -126,7 +126,7 @@ for logframe in log:
     #state, _, _, _ = env.step(action)
     textRect3.center = (state[3]*15, state[2]*15)
     
-    frame = np.rot90(env.render_log(render_mode, logframe.timestep))
+    frame = np.rot90(env.render_log(log_file,render_mode, logframe.timestep))
     frame = np.array(Image.fromarray(frame).resize(size=(Y_resize, X_resize)))
     image = pygame.surfarray.make_surface(frame)
 

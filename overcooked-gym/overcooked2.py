@@ -41,10 +41,6 @@ HOLDING_NOTHING, HOLDING_ONION, HOLDING_DISH, HOLDING_SOUP = range(4)   # Agent 
 HIGHEST_VALUE = 0   # EMPTY soup pan and agent HOLDING_NOTHING
 LOWEST_VALUE = 4    # SOUP_READY
 
-fileCounter = len(glob.glob1("/home/anavc/Overcooked_Gym/overcooked-gym/","logfile_AstroHuman_*"))
-
-log_file = f"logfile_AstroHuman_{fileCounter-1}.pickle"
-
 
 """
 Layouts
@@ -88,13 +84,13 @@ LAYOUTS = {
         ["X", "D", "X", "X", "P", "X", "X", "O", "X"],
         ["X", " ", " ", " ", "B", " ", " ", " ", "X"],
         ["X", " ", " ", " ", "B", " ", " ", " ", "X"],
-        ["X", " ", " ", " ", " ", " ", " ", " ", "X"],        
+        ["X", " ", " ", "I", "I", "I", " ", " ", "X"],        
         ["X", " ", "B", "B", "B", "B", "B", " ", "X"],
-        ["X", " ", " ", "B", " ", "B", " ", " ", "X"],
-        ["X", " ", " ", " ", " ", " ", " ", " ", "X"],
+        ["X", " ", "I", "B", "I", "B", "I", " ", "X"],
+        ["X", " ", "I", "I", "I", "I", "I", " ", "X"],
         ["X", "X", "X", "X", "X", "X", "X", "X", "X"],
     ]),
-    "Lab": np.array([
+    "Lab1": np.array([
         ["D", "X", "X", "X", "X", "X", "X", "P", "X", "X", "X", "X", "X", "X", "O"],
         ["X", " ", " ", " ", " ", " ", " ", "B", " ", " ", " ", " ", "B", "B", "X"],
         ["X", "B", "B", " ", " ", "B", "B", "B", "B", "B", " ", "B", "B", "B", "X"],
@@ -157,7 +153,7 @@ class Overcooked(Env):
         self.pan = self._pan_location(self.layout)
         self.features_meaning = BASE_FEATURES_MEANING + [f"balcony_{b}" for b in range(self.num_balconies)]
         self.onion_picked = None
-        if self.layout_name == "Lab":
+        if self.layout_name == "Lab1":
             self.onions = Onion_list([(8,1), (2,2), (12,9), (9,10)], [0,0,0,0])
         elif self.layout_name == "kitchen2":
             self.onions = Onion_list([(2,4), (4,4), (4,6)], [0,0,0])
@@ -210,7 +206,7 @@ class Overcooked(Env):
             self.frame = self.render_state(self.state)
             return self.frame
 
-    def render_log(self, mode="human", log_step=0):
+    def render_log(self, log_file, mode="human", log_step=0):
         with open(log_file, "rb") as f:
             log = pickle.load(f)
         print("log step: ", log_step)
@@ -411,7 +407,7 @@ class Overcooked(Env):
     def _random_initial_state(self):
 
         #a0_cell = random.choice(self.valid_start_cells_a0)
-        if self.layout_name == "Lab":
+        if self.layout_name == "Lab1":
             a1_cell = (7,6)
             a0_cell = (6,6)
         elif self.layout_name == "kitchen2":
@@ -431,7 +427,7 @@ class Overcooked(Env):
         a0_hand, a1_hand = HOLDING_NOTHING, HOLDING_NOTHING
         pan = EMPTY
         balconies = [EMPTY for _ in range(self.num_balconies)]
-        if self.layout_name == "Lab":
+        if self.layout_name == "Lab1":
             balconies[4] = HOLDING_ONION #define onion initial pos
             balconies[33] = HOLDING_ONION
             balconies[38] = HOLDING_ONION

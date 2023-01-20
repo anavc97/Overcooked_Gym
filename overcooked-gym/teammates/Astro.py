@@ -9,14 +9,13 @@ from teammates.HandcodedTeammate import HandcodedTeammate
 import time, random, copy
 import glob
 
-
-fileCounter = len(glob.glob1("/home/anavc/Overcooked_Gym/overcooked-gym/","logfile_AstroHuman_*"))
-log_file = f"logfile_AstroHuman_{fileCounter-1}.pickle"
-
+LVL=1
+LOG_NR = 111
+log_file = f"/home/anavc/Overcooked_Gym/overcooked-gym/logfiles/logfile_{LOG_NR}_lvl{LVL}.pickle"
 
 OFFSETS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 agents = ['Human', 'Astro']
-S_COEF = 0.9 #prob of slipping
+S_COEF = 0 #prob of slipping
 STATE_MAPS = []
 ADJACENCY_MATRIXS = []
 #LAB STATE MAP
@@ -113,6 +112,9 @@ class AstroHandcoded(HandcodedTeammate):
         super().__init__(LAYOUTS[layout], index)
         self.layout = LAYOUTS[layout]
         self.layout_name = layout
+        self.S_COEF = 0
+        if self.layout_name == 'kitchen2':
+            self.S_COEF = 0.15
         self.num_rows, self.num_columns = self.layout.shape
         self.env = env
         self.onion_time = 0
@@ -121,11 +123,12 @@ class AstroHandcoded(HandcodedTeammate):
     
 
     def policy(self, state: ndarray):
+        self.env.state[8] = 4
         a0_row, a0_column, a1_row, a1_column, a0_heading, a1_heading, a0_hand, a1_hand, pan = state[:9] #a0 - players a1 - teammate
         hand = a0_hand if self.index == 0 else a1_hand
         onions = self.env.onions
+        pos = (state[2], state[3])
         dist_onion = np.zeros(len(onions.pos))
-
         if a0_hand == HOLDING_ONION:
 
             if self.prev_time == 0:
@@ -153,13 +156,10 @@ class AstroHandcoded(HandcodedTeammate):
             action = self._action_to_move_to(state, (a0_row, a0_column))
         else:
             action = self._action_to_move_to(state, onions.pos[np.argmin(dist_onion)])
-            print("Moving to target: ", onions.pos[np.argmin(dist_onion)])
-            '''if (a1_column == 12 and 9<=a1_row<=13) or (a1_row == 13 and 6<=a1_column<=12) or (a1_row == 10 and 9<=a1_column<=13) or (a1_row == 9 and 12<=a1_column<=13) or (a1_column == 9 and a1_row == 9) or (a1_column == 8 and a1_row == 12):
-                print("Slipery Slope")
-                if random.random()>=(1-S_COEF):
-                    print("Slipped")
-                    x,y =  self.cell_facing_agent(a1_row, a1_column, a1_heading)
-                    action = self._action_to_move_to(state,(x,y-1))'''
+
+        if random.random()<self.S_COEF and self.layout[pos[0],pos[1]] == 'I':
+            next_move = self.slip_move(pos,state)
+            action = self._action_to_move_to(state,next_move) 
         
 
         return deterministic_policy(action, len(ACTION_MEANINGS))
@@ -185,6 +185,17 @@ class AstroHandcoded(HandcodedTeammate):
 
         return object_row, object_column
 
+    def slip_move(self, pos, state_env):
+        print("Slipped")
+        self.env.state[8] = 1
+        x,y =  self.cell_facing_agent(pos[0], pos[1],  state_env[5])
+        off = copy.copy(OFFSETS)
+        off.pop(state_env[5])
+        i,j = off[np.random.choice(range(len(off)))]
+        next_move = (x+i,y+j)
+
+        return next_move
+
 
 #############################################################################################################################################################
 #############################################################################################################################################################
@@ -200,13 +211,16 @@ class AstroSmart(HandcodedTeammate):
         super().__init__(LAYOUTS[layout], index)
         self.layout = LAYOUTS[layout]
         self.layout_name = layout
+        self.S_COEF = 0
+        if self.layout_name == 'kitchen2':
+            self.S_COEF = 0.15
         self.num_rows, self.num_columns = self.layout.shape
         self.env = env
         self.onion_time = 0
         self.curr_time = 0
         self.prev_time = 0
         self.balcony_contents = []
-        if self.layout_name == "Lab":
+        if self.layout_name == "Lab1":
             self.state_map = STATE_MAPS[0]
             self.ad_matrix = ADJACENCY_MATRIXS[0]
             self.human_pos = [(13,2), (9,1), (2,3), (6,5), (8,8), (13,9), (13,9), (5,12)]
@@ -324,7 +338,7 @@ class AstroSmart(HandcodedTeammate):
                 
         if self.index == 1 and state_env[6] == HOLDING_ONION:
             pos = (state_env[2], state_env[3])
-            if random.random()<S_COEF and self.layout[pos[0],pos[1]] == 'I':
+            if random.random()<self.S_COEF and self.layout[pos[0],pos[1]] == 'I':
                 next_move = self.slip_move(pos,state_env)
                 return self._action_to_move_to(state_env,next_move) 
             return self._action_to_move_to(state_env, (state_env[0], state_env[1]))
@@ -349,7 +363,7 @@ class AstroSmart(HandcodedTeammate):
                     return ACTION_MEANINGS.index("stay")
                 elif not self.target[self.index]: 
                     #print(agents[self.index], " goes to target in node: ", self.state_mdp[0], " with prob: ",  self.p_joint[self.mdp.state_index(self.state_mdp)]) # robot goes to target position of node
-                    if random.random()<S_COEF and self.layout[pos[0],pos[1]] == 'I':
+                    if random.random()<self.S_COEF and self.layout[pos[0],pos[1]] == 'I':
                         next_move = self.slip_move(pos,state_env)
                         return self._action_to_move_to(state_env,next_move) 
 
@@ -365,7 +379,7 @@ class AstroSmart(HandcodedTeammate):
                     return ACTION_MEANINGS.index("stay")
                 elif not self.target[self.index]: 
                     #print(agents[self.index], " goes to target in node: ", self.state_mdp[0], " with prob: ",  self.p_joint[self.mdp.state_index(self.state_mdp)]) # robot goes to target position of node
-                    if random.random()<S_COEF and self.layout[pos[0],pos[1]] == 'I':
+                    if random.random()<self.S_COEF and self.layout[pos[0],pos[1]] == 'I':
                         next_move = self.slip_move(pos,state_env)
                         return self._action_to_move_to(state_env,next_move) 
 
@@ -423,7 +437,7 @@ class AstroSmart(HandcodedTeammate):
                 for i in range(0,len(self.onions.pos)):
                     self.dist[i] = np.linalg.norm(np.array([pos[0],pos[1]])-np.array([self.onions.pos[i][0], self.onions.pos[i][1]]))
                 
-                if random.random()<S_COEF and self.layout[pos[0],pos[1]] == 'I':
+                if random.random()<self.S_COEF and self.layout[pos[0],pos[1]] == 'I':
                     next_move = self.slip_move(pos,state_env)
                     return self._action_to_move_to(state_env,next_move)     
                                    
@@ -503,6 +517,10 @@ class AstroFake(HandcodedTeammate):
     def __init__(self, layout, index, env=None):
         super().__init__(LAYOUTS[layout], index)
         self.layout = LAYOUTS[layout]
+        self.layout_name = layout
+        self.S_COEF = 0
+        if self.layout_name == 'kitchen2':
+            self.S_COEF = 0.15
         self.num_rows, self.num_columns = self.layout.shape
         self.env = env
         self.onion_time = 0
@@ -515,6 +533,7 @@ class AstroFake(HandcodedTeammate):
     def policy(self, state: ndarray):
 
         self.env.state[8] = 4
+        pos = (state[2], state[3])
         a0_row, a0_column, a1_row, a1_column, a0_heading, a1_heading, a0_hand, a1_hand, pan = state[:9] #a0 - human 1 - astro
 
         if a0_hand == HOLDING_ONION:
@@ -532,6 +551,9 @@ class AstroFake(HandcodedTeammate):
             self.prev_time = 0
 
         a_joint = self.log[self.cur_frame].action_env
+        if random.random()<self.S_COEF and self.layout[pos[0],pos[1]] == 'I':
+            next_move = self.slip_move(pos,state)
+            action = self._action_to_move_to(state,next_move) 
         action = a_joint[1]
 
         self.cur_frame += 1
@@ -540,3 +562,14 @@ class AstroFake(HandcodedTeammate):
     
     def _reinforce(self, timestep: Timestep):
         pass
+
+    def slip_move(self, pos, state_env):
+        print("Slipped")
+        self.env.state[8] = 1
+        x,y =  self.cell_facing_agent(pos[0], pos[1],  state_env[5])
+        off = copy.copy(OFFSETS)
+        off.pop(state_env[5])
+        i,j = off[np.random.choice(range(len(off)))]
+        next_move = (x+i,y+j)
+
+        return next_move

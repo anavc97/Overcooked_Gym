@@ -124,7 +124,7 @@ for logframe in log:
     #state, _, _, _ = env.step(action)
     textRect3.center = (state[3]*15, state[2]*15)
     
-    frame = np.rot90(env.render_log(render_mode, logframe.timestep))
+    frame = np.rot90(env.render_log(log_file,render_mode, logframe.timestep))
     frame = np.array(Image.fromarray(frame).resize(size=(Y_resize, X_resize)))
     image = pygame.surfarray.make_surface(frame)
 

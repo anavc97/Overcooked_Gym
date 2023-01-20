@@ -85,7 +85,7 @@ with open("transitions_human_{}.pickle".format(MAP), "rb") as f:
     t_human = pickle.load(f)
 
 
-if MAP == "Lab":
+if MAP == "Lab1":
     ACTION_MEANING = ACTION_MEANINGS[0]
     ADJACENCY_MATRIX = ADJACENCY_MATRIXS[0]
 

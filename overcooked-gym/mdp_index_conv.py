@@ -2,7 +2,7 @@ from numpy import ndarray
 import numpy as np
 import pickle
 
-MAP = "Lab"
+MAP = "Lab1"
 
 with open("/home/anavc/Overcooked_Gym/overcooked-gym/mmdp.pickle", "rb") as f:
     mdp = pickle.load(f)

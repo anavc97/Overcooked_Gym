@@ -81,7 +81,7 @@ def valid_id():
     i = 0
     if not user_id == '':
         i = len(glob.glob1("/home/anavc/Overcooked_Gym/overcooked-gym/logfiles/", "logfile_{}_*".format(user_id)))
-        print(i)
+        print(user_id)
     if  i > 0:
         return False
     return user_id.isalnum()
@@ -127,8 +127,16 @@ def main_menu():
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_BACKSPACE: user_id = user_id[:-1]
-                else: user_id += event.unicode
+                if event.key == pygame.K_BACKSPACE : user_id = user_id[:-1]
+                elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
+                    if valid_id():
+                        play_tutorial()
+                    else:
+                        pos = (250, 300)
+                        txt_surf = MENU_TEXT4.copy()
+                        txt_surf.set_alpha(200)
+                        invalid_txt_list.append([txt_surf,pos])
+                elif event.key!= pygame.K_SPACE: user_id += event.unicode
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if valid_id():
                     if PLAY_BUTTON.checkForInput(MENU_MOUSE_POS):
@@ -276,7 +284,7 @@ def mid_screen0_1():
 
 def play_lvl1():
     
-    layout = "Lab"
+    layout = "Lab1"
     env = Overcooked(layout=layout)
     #agent = HumanAgent(action_meanings=env.action_meanings, name="Player 1")  # 1 - selects robot; 0 - selects human
     teammate = AstroSmart(layout, 1, env=env)
