@@ -100,12 +100,14 @@ with open(log_file, "rb") as f:
 print(isinstance(log[0], LogFrame))
 
 start_game = time.time()
-for logframe in log:
+for logframe in log[400:]:
     
     state = logframe.state_env
     a_joint = logframe.action_env
+    state_mdp = logframe.state_mdp
     action = a_joint[0]
     action_r = a_joint[1]
+    print("state: ", state_mdp, " action: ", action_r)
     # completely fill the surface object
     # with white colour
     display_surface.fill(white)

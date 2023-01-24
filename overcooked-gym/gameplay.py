@@ -130,7 +130,8 @@ def main_menu():
                 if event.key == pygame.K_BACKSPACE : user_id = user_id[:-1]
                 elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                     if valid_id():
-                        play_tutorial()
+                        play_lvl1()
+                        #play_tutorial()
                     else:
                         pos = (250, 300)
                         txt_surf = MENU_TEXT4.copy()
