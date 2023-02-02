@@ -28,6 +28,11 @@ class LogFrame:
     self.onion_time = onion_time
     self.game_time = game_time
 
+
+def get_font(size): # Returns Press-Start-2P in the desired size
+    return pygame.font.Font('/home/anavc/Overcooked_Gym/overcooked-gym/overcooked_ai_py/data/fonts/PublicPixel-0W5Kv.ttf', size)
+
+
 # activate the pygame library .
 # initiate pygame and give permission
 # to use pygame's functionality.
@@ -73,15 +78,15 @@ new_frame = pygame.USEREVENT + 1
 pygame.time.set_timer(new_frame, MPF)
 action = 5
 font = pygame.font.Font('/home/anavc/Overcooked_Gym/overcooked-gym/overcooked_ai_py/data/fonts/PublicPixel-0W5Kv.ttf', 25)
-text = font.render('Time: ' + str(time.time()), True, (255,173,1))
-text2 = font.render('Time with ball: ' + str(time.time()), True, (255,173,1))
+text = get_font(25).render('Time: ' + str(time.time()), True, (255,173,1))
+text2 = get_font(25).render('Time with ball: ' + str(time.time()), True, (255,173,1))
 textRect = text.get_rect()
 textRect2 = text.get_rect()
 textRect3 = text.get_rect()
 textRect.center = (int(X*(0.40)), int(Y*(0.965)))
 textRect2.center = (int(X*(0.75)), int(Y*(0.965)))
 game_time = 0
-orig_surf = font.render("*slip*", True, (0,0,255))
+orig_surf = get_font(25).render("???", True, (20,255,20))
 txt_list = []
 slipped = False
 
@@ -134,8 +139,8 @@ for logframe in log[400:]:
 
     # Draws the surface object to the screen.
     game_time = logframe.game_time
-    text = font.render('Time: ' + str(round(time.time()-start_game, 1)), True,(255,173,1) )
-    text2 = font.render('Time with ball: ' + str(round(logframe.onion_time, 1)), True, (255,173,1))
+    text = get_font(25).render('Time: ' + str(round(time.time()-start_game, 1)), True,(255,173,1) )
+    text2 = get_font(25).render('Time with ball: ' + str(round(logframe.onion_time, 1)), True, (255,173,1))
     display_surface.blit(text, textRect)
     display_surface.blit(text2, textRect2)
 

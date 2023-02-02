@@ -30,7 +30,9 @@ left_wall = pygame.Rect(0, 47, 60, Y_resize)
 right_wall = pygame.Rect(X_resize-60, 47, 60, Y_resize)
 down_wall = pygame.Rect(0, Y_resize-47, X_resize, Y_resize)
 up_wall_1 = pygame.Rect(60, 0, 360, 47)
+up_wall_1_t = pygame.Rect(60, 0, 360, 7)
 up_wall_2 = pygame.Rect(480, 0, 360, 47)
+up_wall_2_t = pygame.Rect(480, 0, 360, 7)
 
 single_agent = False
 render = True
@@ -44,7 +46,7 @@ textRect3 = text.get_rect()
 textRect.center = (int(X*(0.40)), int(Y*(0.965)))
 textRect2.center = (int(X*(0.75)), int(Y*(0.965)))
 game_time = 0
-orig_surf = get_font(25).render("*slip*", True, (0,0,255))
+orig_surf = get_font(25).render("???", True, (0,100,0))
 txt_list = []
 t = 0
 slipped = False
@@ -130,8 +132,8 @@ def main_menu():
                 if event.key == pygame.K_BACKSPACE : user_id = user_id[:-1]
                 elif event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                     if valid_id():
-                        play_lvl1()
-                        #play_tutorial()
+                        #play_lvl2()
+                        play_tutorial()
                     else:
                         pos = (250, 300)
                         txt_surf = MENU_TEXT4.copy()
@@ -184,8 +186,8 @@ def play_tutorial():
         for event in pygame.event.get()[-1:]:
             pygame.draw.rect(display_surface, GREY, left_wall)
             pygame.draw.rect(display_surface, GREY, right_wall)
-            pygame.draw.rect(display_surface, GREY, up_wall_1)
-            pygame.draw.rect(display_surface, GREY, up_wall_2)
+            pygame.draw.rect(display_surface, GREY, up_wall_1_t)
+            pygame.draw.rect(display_surface, GREY, up_wall_2_t)
             pygame.draw.rect(display_surface, GREY, down_wall)
 
             # if event object type is QUIT
@@ -238,7 +240,7 @@ def play_tutorial():
             display_surface.blit(text2, textRect2)
 
             if state[8] == 1:
-                pos = (state[3]*(X/15), (state[2]-1)*(Y/15))
+                pos = (state[3]*(X/9), (state[2])*(Y/9))
                 txt_surf = orig_surf.copy()
                 txt_surf.set_alpha(200)
                 txt_list.append([txt_surf,pos])
@@ -589,7 +591,7 @@ def game_over(onion_time, game_time, score):
         display_surface.blit(MENU_TEXT3, MENU_RECT3)
         display_surface.blit(MENU_TEXT4, MENU_RECT4)
         display_surface.blit(MENU_TEXT5, MENU_RECT5)
-        display_surface.blit(MENU_TEXT6, MENU_RECT6)
+        #display_surface.blit(MENU_TEXT6, MENU_RECT6)
         
         for button in [QUIT_BUTTON]:
             button.changeColor(MENU_MOUSE_POS)

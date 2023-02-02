@@ -83,11 +83,11 @@ LAYOUTS = {
     "kitchen2": np.array([
         ["X", "D", "X", "X", "P", "X", "X", "O", "X"],
         ["X", " ", " ", " ", "B", " ", " ", " ", "X"],
-        ["X", " ", " ", " ", "B", " ", " ", " ", "X"],
-        ["X", " ", " ", "I", "I", "I", " ", " ", "X"],        
+        ["X", " ", " ", " ", " ", " ", " ", " ", "X"],
+        ["X", " ", " ", " ", "B", " ", " ", " ", "X"],        
         ["X", " ", "B", "B", "B", "B", "B", " ", "X"],
-        ["X", " ", "I", "B", "I", "B", "I", " ", "X"],
-        ["X", " ", "I", "I", "I", "I", "I", " ", "X"],
+        ["X", "I", "I", "B", "I", "B", "I", "I", "X"],
+        ["X", "I", "I", "I", "I", "I", "I", "I", "X"],
         ["X", "X", "X", "X", "X", "X", "X", "X", "X"],
     ]),
     "Lab1": np.array([
@@ -156,7 +156,7 @@ class Overcooked(Env):
         if self.layout_name == "Lab1":
             self.onions = Onion_list([(8,1), (2,2), (12,9), (9,10)], [0,0,0,0])
         elif self.layout_name == "kitchen2":
-            self.onions = Onion_list([(2,4), (4,4), (4,6)], [0,0,0])
+            self.onions = Onion_list([(3,4), (5,3), (5,5)], [0,0,0])
         elif self.layout_name == "Lab2":
             self.onions = Onion_list([(13,3), (13,10), (1,6), (3,8)], [0,0,0,0])
         self.j_a = None
@@ -434,8 +434,8 @@ class Overcooked(Env):
             balconies[49] = HOLDING_ONION
         elif self.layout_name == "kitchen2":
             balconies[1] = HOLDING_ONION #define onion initial pos
-            balconies[4] = HOLDING_ONION
-            balconies[6] = HOLDING_ONION
+            balconies[7] = HOLDING_ONION
+            balconies[8] = HOLDING_ONION
         if self.layout_name == "Lab2":
             balconies[0] = HOLDING_ONION #define onion initial pos
             balconies[9] = HOLDING_ONION
@@ -591,7 +591,7 @@ class SingleAgentWrapper(Wrapper):
             a1 = self.teammate.action(state)
         else:
             a1 = 5
-            
+          
         joint_action = self.env.pack_joint_action(a0, a1)
         self.j_a = joint_action
         next_state, reward, terminal, info = super().step(joint_action)

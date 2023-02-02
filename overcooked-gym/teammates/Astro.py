@@ -114,7 +114,7 @@ class AstroHandcoded(HandcodedTeammate):
         self.layout_name = layout
         self.S_COEF = 0
         if self.layout_name == 'kitchen2':
-            self.S_COEF = 0.75
+            self.S_COEF = 0.90
         self.num_rows, self.num_columns = self.layout.shape
         self.env = env
         self.onion_time = 0
@@ -156,7 +156,7 @@ class AstroHandcoded(HandcodedTeammate):
             action = self._action_to_move_to(state, (a0_row, a0_column))
         else:
             action = self._action_to_move_to(state, onions.pos[np.argmin(dist_onion)])
-
+           
         if random.random()<self.S_COEF and self.layout[pos[0],pos[1]] == 'I':
             next_move = self.slip_move(pos,state)
             action = self._action_to_move_to(state,next_move) 
@@ -252,6 +252,18 @@ class AstroSmart(HandcodedTeammate):
             if np.array_equal(np.array(val),np.array(state)):
                 return ind
 
+    def prime_action_choice(self, prob):
+        # Bias favouring robot actions == stay or act
+
+        aux = copy.copy(prob)
+        for i in range(len(prob)):
+            if i >=24 and aux[i] != 0:
+                aux[i] = aux[i]*1.1
+        prob = aux / sum(aux)
+        print("prob after: ", prob)
+        #return np.random.choice(range(len(self.JOINT_ACTION_SPACE)), p=prob)
+        return np.argmax(prob)
+
     def policy(self, state: ndarray):
         self.env.state[8] = 4
         a0_row, a0_column, a1_row, a1_column, a0_heading, a1_heading, a0_hand, a1_hand, pan = state[:9] #a0 - human 1 - astro
@@ -268,9 +280,10 @@ class AstroSmart(HandcodedTeammate):
         if self.last_state == self.state_mdp:
             a_joint = self.last_action
         else:
-            a_joint = self.JOINT_ACTION_SPACE[np.random.choice(range(len(self.JOINT_ACTION_SPACE)), p=self.p_joint[self.check_index(self.state_mdp)])]
-        #a_joint = self.JOINT_ACTION_SPACE[np.argmax(self.p_joint[self.mdp.state_index(self.state_mdp)])]
-        print("A JOINT: ", a_joint)
+            print("Prob before: ", self.p_joint[self.check_index(self.state_mdp)])
+            a_joint = self.JOINT_ACTION_SPACE[self.prime_action_choice(self.p_joint[self.check_index(self.state_mdp)])]
+
+        print("A JOINT: ",a_joint) # a0 - robot a1 - human
         self.last_state = copy.copy(self.state_mdp)
         self.last_action = copy.copy(a_joint)
 
@@ -291,7 +304,6 @@ class AstroSmart(HandcodedTeammate):
             self.prev_time = 0
 
         action = self.action_converter(state, self.state_mdp, a_joint[1-self.index]) # Human = player 0 Astro = player 1  
-        print("Action converted to: ", action)
         self.last_state = copy.copy(self.state_mdp)
         self.t += 1
         return deterministic_policy(action, len(ACTION_MEANINGS))
