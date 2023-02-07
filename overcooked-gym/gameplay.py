@@ -46,7 +46,7 @@ textRect3 = text.get_rect()
 textRect.center = (int(X*(0.40)), int(Y*(0.965)))
 textRect2.center = (int(X*(0.75)), int(Y*(0.965)))
 game_time = 0
-orig_surf = get_font(25).render("???", True, (0,100,0))
+orig_surf = get_font(25).render("???", True, (255,0,0))
 txt_list = []
 t = 0
 slipped = False
@@ -357,7 +357,7 @@ def play_lvl1():
             state, _, terminal, _ = env.step(action)
             
             #LOG: timestep, environment state, mdp state, environment action, mdp_action, onion_time, game_time
-            game_time = int(time.time()-start_game)
+            game_time = round(float(time.time()-start_game),1)
             timestep_log = LogFrame(t, state, teammate.last_state, env.unpack_joint_action(env.j_a), teammate.last_action, teammate.onion_time, game_time)
             log.append(timestep_log)
             t += 1
@@ -518,7 +518,7 @@ def play_lvl2():
             state, _, terminal, _ = env.step(action)
             
             #LOG: timestep, environment state, mdp state, environment action, mdp_action, onion_time, game_time
-            game_time = int(time.time()-start_game)
+            game_time = round(float(time.time()-start_game),1)
             timestep_log = LogFrame(t, state, teammate.last_state, env.unpack_joint_action(env.j_a), teammate.last_action, teammate.onion_time, game_time)
             log.append(timestep_log)
             t += 1
@@ -555,7 +555,7 @@ def play_lvl2():
     print("Game time: ", game_time)
     print("Time with onion in hand: ", round(teammate.onion_time, 1))
     print("Score: ", 100 - game_time - round(teammate.onion_time))
-    game_over(teammate.onion_time, game_time, 100 - game_time - teammate.onion_time)
+    game_over(teammate.onion_time, game_time, 100 - game_time - round(teammate.onion_time))
 
 def game_over(onion_time, game_time, score):
     
@@ -574,7 +574,7 @@ def game_over(onion_time, game_time, score):
         MENU_TEXT3 = get_font(30).render("TIME WITH ONION ", True, "#b68f40")
         MENU_RECT3 = MENU_TEXT2.get_rect(center=(455, 280))
 
-        MENU_TEXT4 = get_font(30).render("SCORE: {}".format(round(score,1)), True, "#b68f40")
+        MENU_TEXT4 = get_font(30).render("SCORE: {}".format(score), True, "#b68f40")
         MENU_RECT4 = MENU_TEXT2.get_rect(center=(455, 380))
 
         MENU_TEXT5 = get_font(30).render("IN HAND: {}".format(round(onion_time,1)), True, "#b68f40")

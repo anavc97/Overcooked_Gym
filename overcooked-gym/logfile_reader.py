@@ -105,7 +105,7 @@ with open(log_file, "rb") as f:
 print(isinstance(log[0], LogFrame))
 
 start_game = time.time()
-for logframe in log[400:]:
+for logframe in log:
     
     state = logframe.state_env
     a_joint = logframe.action_env
@@ -139,11 +139,12 @@ for logframe in log[400:]:
 
     # Draws the surface object to the screen.
     game_time = logframe.game_time
-    text = get_font(25).render('Time: ' + str(round(time.time()-start_game, 1)), True,(255,173,1) )
+    text = get_font(25).render('Time: ' + str(game_time), True,(255,173,1) )
     text2 = get_font(25).render('Time with ball: ' + str(round(logframe.onion_time, 1)), True, (255,173,1))
     display_surface.blit(text, textRect)
     display_surface.blit(text2, textRect2)
 
+#str(round(time.time()-start_game, 1))
     if state[8] == 1:
         pos = (state[3]*(X/15), (state[2]-1)*(Y/15))
         txt_surf = orig_surf.copy()

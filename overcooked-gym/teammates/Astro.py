@@ -9,8 +9,8 @@ from teammates.HandcodedTeammate import HandcodedTeammate
 import time, random, copy
 import glob
 
-LVL=1
-LOG_NR = 215
+LVL=2
+LOG_NR = 101
 log_file = f"/home/anavc/Overcooked_Gym/overcooked-gym/logfiles/logfile_{LOG_NR}_lvl{LVL}.pickle"
 
 OFFSETS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
@@ -114,7 +114,7 @@ class AstroHandcoded(HandcodedTeammate):
         self.layout_name = layout
         self.S_COEF = 0
         if self.layout_name == 'kitchen2':
-            self.S_COEF = 0.90
+            self.S_COEF = 0.75
         self.num_rows, self.num_columns = self.layout.shape
         self.env = env
         self.onion_time = 0
