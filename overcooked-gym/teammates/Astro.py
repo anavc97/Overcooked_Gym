@@ -114,7 +114,7 @@ class AstroHandcoded(HandcodedTeammate):
         self.layout_name = layout
         self.S_COEF = 0
         if self.layout_name == 'kitchen2':
-            self.S_COEF = 0.75
+            self.S_COEF = 0.65
         self.num_rows, self.num_columns = self.layout.shape
         self.env = env
         self.onion_time = 0
@@ -160,6 +160,8 @@ class AstroHandcoded(HandcodedTeammate):
         if random.random()<self.S_COEF and self.layout[pos[0],pos[1]] == 'I':
             next_move = self.slip_move(pos,state)
             action = self._action_to_move_to(state,next_move) 
+        else:
+            print("action")
         
 
         return deterministic_policy(action, len(ACTION_MEANINGS))
@@ -213,7 +215,7 @@ class AstroSmart(HandcodedTeammate):
         self.layout_name = layout
         self.S_COEF = 0
         if self.layout_name == 'kitchen2':
-            self.S_COEF = 0.75
+            self.S_COEF = 0.65
         self.num_rows, self.num_columns = self.layout.shape
         self.env = env
         self.onion_time = 0
@@ -532,7 +534,7 @@ class AstroFake(HandcodedTeammate):
         self.layout_name = layout
         self.S_COEF = 0
         if self.layout_name == 'kitchen2':
-            self.S_COEF = 0.75
+            self.S_COEF = 0.65
         self.num_rows, self.num_columns = self.layout.shape
         self.env = env
         self.onion_time = 0
@@ -566,6 +568,8 @@ class AstroFake(HandcodedTeammate):
         if random.random()<self.S_COEF and self.layout[pos[0],pos[1]] == 'I':
             next_move = self.slip_move(pos,state)
             action = self._action_to_move_to(state,next_move) 
+        else:
+            print("action")
         action = a_joint[1]
 
         self.cur_frame += 1
